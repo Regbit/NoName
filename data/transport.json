@@ -1,0 +1,10 @@
+{
+	"SCV_MKI": {
+		"name": "Scavenger MKI",
+		"max_speed": 230
+	},
+	"SCV_MKII": {
+		"name": "Scavenger MKII",
+		"max_speed": 300
+	}
+}
