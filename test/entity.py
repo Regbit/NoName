@@ -4,6 +4,9 @@ from src.entity.entity import *
 
 class EntityTest(TestCase):
 
+	def tearDown(self) -> None:
+		Entity.entity_list.clear()
+
 	def test_entity_class_init(self):
 		cls = Entity
 
@@ -32,6 +35,12 @@ class EntityTest(TestCase):
 
 		self.assertIsNone(e.name)
 		self.assertIsNone(e.parent_env)
+
+	def test_entity_object_init_entity_list_empty(self):
+		cls = Entity
+		e = Entity()
+		self.assertIsNotNone(e)
+		self.assertEqual(len(cls.entity_list), 0)
 
 	def test_entity_object_init_with_attributes(self):
 		name = 'Entity'
@@ -75,6 +84,35 @@ class EntityTest(TestCase):
 		self.assertIsNotNone(attributes_dict_copy)
 		self.assertIsNot(attributes_dict_copy, cls.attributes_dict)
 		self.assertEqual(len(attributes_dict_copy), len(cls.attributes_dict))
+
+		for k, v in attributes_dict_copy.items():
+			self.assertEqual(v, cls.attributes_dict[k])
+
+	def test_entity_make_empty(self):
+		cls = Entity
+		e = cls.make()
+
+		self.assertIsNotNone(e)
+
+		self.assertIsNone(e.name)
+		self.assertIsNone(e.parent_env)
+
+		self.assertEqual(len(cls.entity_list), 1)
+		self.assertIs(cls.entity_list[0], e)
+
+	def test_entity_make_with_attributes(self):
+		cls = Entity
+		name = 'Entity'
+		parent_env = Entity()
+		e = cls.make(name=name, parent_env=parent_env)
+
+		self.assertIsNotNone(e)
+		self.assertIsNotNone(e.name)
+		self.assertEqual(e.name, name)
+		self.assertEqual(e.parent_env, parent_env)
+
+		self.assertEqual(len(cls.entity_list), 1)
+		self.assertIs(cls.entity_list[0], e)
 
 
 if __name__ == '__main__':

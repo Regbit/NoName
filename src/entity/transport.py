@@ -40,54 +40,34 @@ class Rover(Vehicle, ABC):
 
 class RoverClass(ABC):
 
-	ScavengerMKI = {
-		'name': 'Scavenger MKI',
-		'mass': 2500,
-		'volume': 25,
-		'max_speed': 230,
-		'storage': Storage.make(capacity={Goods: 5, Ore: 0.0, Gas: 0.0}),
-		'max_payload_mass': 1500
+	# class ScavengerMKI:
+	# 	a = {
+	# 		'name': 'Scavenger MKI',
+	# 		'mass': 2500,
+	# 		'volume': 25,
+	# 		'max_speed': 230,
+	# 		'storage': Storage.make(capacity={Goods: 5, Ore: 0.0, Gas: 0.0}),
+	# 		'max_payload_mass': 1500
+	# 	}
 
-	}
-
-
-class ScavengerMKI(Rover):
-
-	def __init__(self, **kwargs):
-		"""
-
-		:param kwargs: {
-			parent_env: Entity,
-			pos: Vector3,
-			destination_pos: Vector3
+	@classmethod
+	def scavenger_mk1(cls):
+		return {
+			'name': 'Scavenger MKI',
+			'mass': 2500,
+			'volume': 25,
+			'max_speed': 230,
+			'storage': Storage.make(capacity={Goods: 5, Ore: 0.0, Gas: 0.0}),
+			'max_payload_mass': 1500
 		}
-		"""
 
-		kwargs['name'] = 'Scavenger MKI'
-		kwargs['mass'] = 2500
-		kwargs['volume'] = 25
-		kwargs['max_speed'] = 230
-		kwargs['storage'] = Storage.make(parent_env=self, capacity={Goods: 5, Ore: 0.0, Gas: 0.0})
-		kwargs['max_payload_mass'] = 1500
-		super().__init__(**kwargs)
-
-
-class ScavengerMKII(Rover):
-
-	def __init__(self, **kwargs):
-		"""
-
-		:param kwargs: {
-			parent_env: Entity,
-			pos: Vector3,
-			destination_pos: Vector3
+	@classmethod
+	def scavenger_mk2(cls):
+		return {
+			'name': 'Scavenger MKII',
+			'mass': 2200,
+			'volume': 24,
+			'max_speed': 280,
+			'storage': Storage.make(capacity={Goods: 7.5, Ore: 0.0, Gas: 0.0}),
+			'max_payload_mass': 1750
 		}
-		"""
-
-		kwargs['name'] = 'Scavenger MKII'
-		kwargs['mass'] = 2200
-		kwargs['volume'] = 24
-		kwargs['max_speed'] = 280
-		kwargs['storage'] = Storage.make(parent_env=self, capacity={Goods: 7.5, Ore: 0.0, Gas: 0.0})
-		kwargs['max_payload_mass'] = 1750
-		super().__init__(**kwargs)

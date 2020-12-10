@@ -52,9 +52,12 @@ def storage_test_2():
 
 
 def rover_test_1():
-	r = Rover.make(**RoverClass.ScavengerMKI)
+	r_1 = Rover.make(**RoverClass.scavenger_mk1())
+	r_2 = Rover.make(**RoverClass.scavenger_mk1())
 
-	print(r)
+	print(r_1)
+	print(r_2)
+	print(r_1.storage is r_2.storage)
 
 
 def tools_test_1():
@@ -64,6 +67,3 @@ def tools_test_1():
 
 	for e in lst:
 		print(e)
-
-
-print(type(lambda x: isinstance(x, str)).__name__)

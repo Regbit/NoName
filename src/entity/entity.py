@@ -29,9 +29,6 @@ class Entity(ABC):
 		self.name = None
 		self.parent_env = None
 
-	# 	self.init_attrs(**kwargs)
-	#
-	# def init_attrs(self, **kwargs):
 		for name, meta in self.attributes_dict.items():
 			if kwargs.get(name) and meta[0](kwargs.get(name)):
 				self.__setattr__(name, kwargs.get(name))
@@ -67,7 +64,7 @@ class Entity(ABC):
 			new = cls(**kwargs)
 			cls.entity_list.append(new)
 			return new
-		except ValueError as err:
+		except AttributeTypeError as err:
 			print(err)
 
 	@classmethod
