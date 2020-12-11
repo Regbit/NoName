@@ -1,5 +1,5 @@
 from abc import ABC
-from src.position import Vector3
+from position import Vector3
 from copy import deepcopy
 
 
@@ -65,7 +65,9 @@ class Entity(ABC):
 			cls.entity_list.append(new)
 			return new
 		except AttributeTypeError as err:
-			print(err)
+			# TODO Figure out what tot do here. Maybe use Logger.
+			# print(err)
+			pass
 
 	@classmethod
 	def delete(cls, *args):
@@ -78,7 +80,6 @@ class Entity(ABC):
 			if isinstance(e, Entity):
 				e.entity_list.remove(e)
 				del e
-				# TODO Check if Entity really is deleted
 
 	def update(self):
 		raise NotImplementedError(f'Method update() was not implemented in class "{self.__class__.__name__}"')

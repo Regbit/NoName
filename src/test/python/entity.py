@@ -1,5 +1,6 @@
 from unittest import TestCase, main
-from src.entity.entity import *
+from src.main.python.entity.entity import *
+import gc
 
 
 class EntityTest(TestCase):
@@ -49,7 +50,6 @@ class EntityTest(TestCase):
 		e = Entity(name=name, parent_env=parent_env)
 		self.assertIsNotNone(e)
 
-		self.assertIsNotNone(e.name)
 		self.assertEqual(e.name, name)
 		self.assertEqual(e.parent_env, parent_env)
 
@@ -71,7 +71,6 @@ class EntityTest(TestCase):
 		e = Entity(name=name, parent_env=parent_env, nonexistent_attribute=nonexistent_attribute)
 		self.assertIsNotNone(e)
 
-		self.assertIsNotNone(e.name)
 		self.assertEqual(e.name, name)
 		self.assertEqual(e.parent_env, parent_env)
 
@@ -107,12 +106,100 @@ class EntityTest(TestCase):
 		e = cls.make(name=name, parent_env=parent_env)
 
 		self.assertIsNotNone(e)
-		self.assertIsNotNone(e.name)
 		self.assertEqual(e.name, name)
 		self.assertEqual(e.parent_env, parent_env)
 
 		self.assertEqual(len(cls.entity_list), 1)
 		self.assertIs(cls.entity_list[0], e)
+
+	def test_entity_make_with_faulty_attributes(self):
+		cls = Entity
+		name = 123
+		parent_env = 'name'
+		e = None
+
+		e = cls.make(name=name, parent_env=parent_env)
+
+		self.assertIsNone(e)
+
+		self.assertEqual(len(cls.entity_list), 0)
+
+	def test_entity_make_with_nonexistent_attributes(self):
+		cls = Entity
+		name = 'Entity'
+		parent_env = Entity()
+		nonexistent_attribute = 1
+
+		e = cls.make(name=name, parent_env=parent_env, nonexistent_attribute=nonexistent_attribute)
+		self.assertIsNotNone(e)
+
+		self.assertIsNotNone(e.name)
+		self.assertEqual(e.name, name)
+		self.assertEqual(e.parent_env, parent_env)
+
+		with self.assertRaises(AttributeError):
+			e.nonexistent_attribute
+
+	def test_entity_delete_one(self):
+		cls = Entity
+		e = cls.make()
+
+		self.assertIsNotNone(e)
+		self.assertEqual(len(cls.entity_list), 1)
+
+		cls.delete(e)
+
+		self.assertEqual(len(cls.entity_list), 0)
+
+		gc.collect()
+		self.assertEqual(len(gc.get_referrers(e)), 0)
+
+	def test_entity_delete_multiple(self):
+		cls = Entity
+		e_1 = cls.make()
+		e_2 = cls.make()
+		e_3 = cls.make()
+
+		self.assertIsNotNone(e_1)
+		self.assertIsNotNone(e_2)
+		self.assertIsNotNone(e_3)
+
+		self.assertIsNot(e_1, e_2)
+		self.assertIsNot(e_1, e_3)
+		self.assertIsNot(e_2, e_3)
+
+		self.assertEqual(len(cls.entity_list), 3)
+
+		cls.delete(e_1, e_2)
+
+		self.assertEqual(len(cls.entity_list), 1)
+
+		gc.collect()
+		self.assertEqual(len(gc.get_referrers(e_1)), 0)
+		self.assertEqual(len(gc.get_referrers(e_2)), 0)
+
+		self.assertIs(cls.entity_list[0], e_3)
+
+	def test_entity_delete_parent(self):
+		cls = Entity
+		e_par = cls.make()
+		e_ch = cls.make(parent_env=e_par)
+
+		self.assertIsNotNone(e_par)
+		self.assertIsNotNone(e_ch)
+		self.assertIsNot(e_par, e_ch)
+		self.assertIs(e_ch.parent_env, e_par)
+		self.assertEqual(len(cls.entity_list), 2)
+
+		cls.delete(e_par)
+
+		self.assertEqual(len(cls.entity_list), 1)
+
+		gc.collect()
+		print("\n"+"!"*25)
+		print(gc.get_referrers(e_par))
+		print("!"*25)
+		# self.assertEqual(len(gc.get_referrers(e_par)), 0)
 
 
 if __name__ == '__main__':

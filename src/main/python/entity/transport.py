@@ -1,7 +1,7 @@
 from abc import ABC
-from src.entity.entity import WorldEntity
-from src.entity.storage import Storage
-from src.entity.item import Goods, Ore, Gas
+from entity.entity import WorldEntity
+from entity.storage import Storage
+from entity.item import Goods, Ore, Gas
 
 
 class Vehicle(WorldEntity, ABC):

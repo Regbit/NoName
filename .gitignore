@@ -3,6 +3,8 @@
 
 src/__pycache__/
 
-src/entity/__pycache__/
+src/main/python/entity/__pycache__/
 
 venv/
+
+src/test/python/.pytest_cache/

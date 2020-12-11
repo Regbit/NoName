@@ -1,9 +1,9 @@
-from src.entity.entity import Building
-from src.entity.celestialobject import Planet
-from src.entity.storage import *
-from src.entity.item import *
-from src.entity.transport import *
-from src.tools import set_attribute_for_all_elements
+from entity.entity import Building
+from entity.celestialobject import Planet
+from entity.storage import *
+from entity.item import *
+from entity.transport import *
+from tools import set_attribute_for_all_elements
 
 
 def common_test_1():

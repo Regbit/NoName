@@ -1,6 +1,6 @@
-from src.entity.entity import Entity, MassedEntity
-from src.entity.item import Item, Goods, Ore, Gas
-from src.tools import set_attribute_for_all_elements
+from entity.entity import Entity, MassedEntity
+from entity.item import Item, Goods, Ore, Gas
+from tools import set_attribute_for_all_elements
 
 
 class Cargo(MassedEntity):
