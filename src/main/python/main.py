@@ -1,4 +1,4 @@
-from entity.entity import Building
+from entity.building import Building
 from entity.celestialobject import Planet
 from entity.storage import *
 from entity.item import *
@@ -52,12 +52,16 @@ def storage_test_2():
 
 
 def rover_test_1():
-	r_1 = Rover.make(**RoverClass.scavenger_mk1())
-	r_2 = Rover.make(**RoverClass.scavenger_mk1())
+	r_1 = ScavengerMKI.make()
+	r_2 = ScavengerMKI.make()
+	r_3 = ScavengerMKII.make()
 
 	print(r_1)
 	print(r_2)
+	print(r_3)
 	print(r_1.storage is r_2.storage)
+
+	print(Entity.entity_list)
 
 
 def tools_test_1():

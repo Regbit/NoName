@@ -26,17 +26,25 @@ class Entity(ABC):
 		}
 		"""
 
-		self.name = None
-		self.parent_env = None
+		try:
+			self.name: str = None
+			self.parent_env: Entity = None
 
-		for name, meta in self.attributes_dict.items():
-			if kwargs.get(name) and meta[0](kwargs.get(name)):
-				self.__setattr__(name, kwargs.get(name))
-			elif kwargs.get(name) and not meta[0](kwargs.get(name)):
-				raise AttributeTypeError(f'Attribute {name} was not set! Input value: {kwargs.get(name)}')
-			else:
-				self.__setattr__(name, deepcopy(meta[1]))
+			kwargs.update(self.class_desc())
 
+			for name, meta in self.attributes_dict.items():
+				if kwargs.get(name) and meta[0](kwargs.get(name)):
+					self.__setattr__(name, kwargs.get(name))
+				elif kwargs.get(name) and not meta[0](kwargs.get(name)):
+					raise AttributeTypeError(f'Attribute {name} was not set! Input value: {kwargs.get(name)}')
+				else:
+					self.__setattr__(name, deepcopy(meta[1]))
+		except AttributeTypeError as err:
+			# TODO Figure out what tot do here. Maybe use Logger.
+			# print(err)
+			pass
+
+		self.entity_list.append(self)
 
 	@property
 	def obj_info_short(self):
@@ -81,6 +89,10 @@ class Entity(ABC):
 				e.entity_list.remove(e)
 				del e
 
+	@classmethod
+	def class_desc(cls):
+		return {}
+
 	def update(self):
 		raise NotImplementedError(f'Method update() was not implemented in class "{self.__class__.__name__}"')
 
@@ -104,9 +116,12 @@ class MassedEntity(Entity, ABC):
 			volume: float
 		}
 		"""
-		self.mass = None
-		self.volume = None
+		self.mass: float = None
+		self.volume: float = None
 		super().__init__(**kwargs)
+
+	def __str__(self):
+		return f"{self.obj_info}: M={self.mass}; V={self.volume}"
 
 
 class WorldEntity(MassedEntity, ABC):
@@ -135,14 +150,19 @@ class WorldEntity(MassedEntity, ABC):
 		}
 		"""
 
-		self.pos = None
-		self.can_move = None
-		self.destination_pos = None
-		self.max_speed = None
+		self.pos: Vector3 = None
+		self.can_move: bool = None
+		self.destination_pos: Vector3 = None
+		self.max_speed: float = None
 		super().__init__(**kwargs)
 
-	def set_destination(self, **kwargs):
-		self.destination_pos = kwargs.get('dest_obj').pos if kwargs.get('dest_obj') else kwargs.get('dest_pos')
+	def set_destination(self, destination):
+		if isinstance(destination, Entity):
+			self.destination_pos = destination.pos
+		elif isinstance(destination, Vector3):
+			self.destination_pos = destination
+		else:
+			return False
 		return True
 
 	def draw(self):
@@ -153,8 +173,4 @@ class WorldEntity(MassedEntity, ABC):
 
 
 class ResourceNode(WorldEntity):
-	pass
-
-
-class Building(WorldEntity):
 	pass

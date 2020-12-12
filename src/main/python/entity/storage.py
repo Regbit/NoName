@@ -1,15 +1,15 @@
-from entity.entity import Entity, MassedEntity
-from entity.item import Item, Goods, Ore, Gas
+from src.main.python.entity.entity import Entity
+from src.main.python.entity.item import Item, Goods, Ore, Gas
 from tools import set_attribute_for_all_elements
 
 
-class Cargo(MassedEntity):
+class Cargo(Entity):
 	"""
 	Class used to represent and manage cargo - a set of items.
 	Cargo is created when two Entities interact (item transfer)
 	"""
-	attributes_dict = Entity.attributes_dict
-	attributes_dict['item_list'] = lambda x: isinstance(x, list) and x[0] and issubclass(type(x[0]), Item), list()
+	attributes_dict = Entity.attributes_dict_copy()
+	attributes_dict['item_dict'] = lambda x: isinstance(x, dict), dict()
 
 	def __init__(self, **kwargs):
 		"""
@@ -17,19 +17,17 @@ class Cargo(MassedEntity):
 		:param kwargs: {
 			name: str,
 			parent_env: Entity,
-			item_list: list
+			item_dict: dict
 		}
 		"""
 
-		self.item_list = None
+		self.item_dict: dict = None
 		super().__init__(**kwargs)
-		self.mass = sum(item.total_mass for item in self.item_list)
-		self.volume = sum(item.total_volume for item in self.item_list)
-		for item in self.item_list:
-			item.parent_env = self
+		self.mass = sum(item.mass * qty for item, qty in self.item_dict.items())
+		self.volume = sum(item.volume * qty for item, qty in self.item_dict.items())
 
 	def __str__(self):
-		items = '\n\t'.join([str(i) for i in self.item_list])
+		items = '\n\t'.join([str(i) for i in self.item_dict.items()])
 		return f"{self.obj_info}:\n\t{items}"
 
 	def get_all_by_class(self, cls):
@@ -38,7 +36,7 @@ class Cargo(MassedEntity):
 		:param cls: Goods, Ore or Gas
 		:return:
 		"""
-		return [i for i in self.item_list if issubclass(i.__class__, cls)]
+		return [i for i in self.item_dict if issubclass(i.__class__, cls)]
 
 	def get_total_mass_by_class(self, cls):
 		"""
@@ -46,7 +44,7 @@ class Cargo(MassedEntity):
 		:param cls: Goods, Ore or Gas
 		:return:
 		"""
-		return sum([i.total_mass for i in self.item_list if issubclass(i.__class__, cls)])
+		return sum([i.total_mass for i in self.item_dict if issubclass(i.__class__, cls)])
 
 	def get_total_volume_by_class(self, cls):
 		"""
@@ -54,7 +52,7 @@ class Cargo(MassedEntity):
 		:param cls: Goods, Ore or Gas
 		:return:
 		"""
-		return sum([i.total_volume for i in self.item_list if issubclass(i.__class__, cls)])
+		return sum([i.total_volume for i in self.item_dict if issubclass(i.__class__, cls)])
 
 
 class NotEnoughSpaceError(Exception):
@@ -85,7 +83,7 @@ class Storage(Entity):
 
 	storage_types_tuple = (Goods, Ore, Gas)
 
-	attributes_dict = Entity.attributes_dict
+	attributes_dict = Entity.attributes_dict_copy()
 	attributes_dict['stored_items_list'] = lambda x: isinstance(x, list) and x[0] and issubclass(type(x[0]), list(Storage.storage_types_tuple)), list()
 	attributes_dict['capacity'] = lambda x: isinstance(x, dict) and set(x.keys()) == set(Storage.storage_types_tuple) and bool(sum(x.values())), {Goods: 0.0, Ore: 0.0, Gas: 0.0}
 	attributes_dict['reserved_cargo'] = lambda x: isinstance(x, list) and x[0] and isinstance(x[0], Cargo), list()
@@ -124,8 +122,11 @@ class Storage(Entity):
 		return f"{super().obj_info}:\n\tC=({capacity});\n\tRS=({reserved_space});\n\tOS=({filled_space});\n\tAS=({available_space});\n\t\t{items}"
 
 	def __str__(self):
-
 		return f"{self.obj_info_short}:"
+
+	@property
+	def total_mass(self):
+		return sum([i.total_mass for i in self.stored_items_list])
 
 	def get_reserved_space_by_class(self, cls):
 		"""
@@ -202,9 +203,11 @@ class Storage(Entity):
 		self.expected_cargo.remove(cargo)
 
 		# Delete cargo object
-		Entity.delete(cargo)
+		self.delete(cargo)
 
 		return True
 
 	def reserve_cargo(self, cargo: Cargo):
-		pass
+
+		for item in cargo.item_list:
+			pass

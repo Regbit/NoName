@@ -8,3 +8,5 @@ src/main/python/entity/__pycache__/
 venv/
 
 src/test/python/.pytest_cache/
+
+src/main/python/__pycache__/

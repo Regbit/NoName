@@ -1,4 +1,4 @@
-from unittest import TestCase, main
+from unittest import TestCase, main, skip
 from src.main.python.entity.entity import *
 import gc
 
@@ -180,7 +180,8 @@ class EntityTest(TestCase):
 
 		self.assertIs(cls.entity_list[0], e_3)
 
-	def test_entity_delete_parent(self):
+	@skip
+	def _test_entity_delete_parent(self):
 		cls = Entity
 		e_par = cls.make()
 		e_ch = cls.make(parent_env=e_par)
@@ -200,6 +201,38 @@ class EntityTest(TestCase):
 		print(gc.get_referrers(e_par))
 		print("!"*25)
 		# self.assertEqual(len(gc.get_referrers(e_par)), 0)
+
+
+class MassedEntityTest(TestCase):
+
+	def tearDown(self) -> None:
+		Entity.entity_list.clear()
+
+	def test_massed_entity_class_init(self):
+		cls = MassedEntity
+
+		self.assertIsNotNone(cls)
+		self.assertTrue(issubclass(cls, Entity))
+
+		self.assertIsNotNone(cls.entity_list)
+		self.assertIsInstance(cls.entity_list, list)
+		self.assertEqual(len(cls.entity_list), 0)
+		self.assertIs(cls.entity_list, Entity.entity_list)
+
+		self.assertIsNotNone(cls.attributes_dict)
+		self.assertIsInstance(cls.attributes_dict, dict)
+		self.assertGreater(len(cls.attributes_dict), 0)
+
+		self.assertEqual(set(cls.attributes_dict.keys()), {'name', 'parent_env', 'mass', 'volume'})
+		self.assertIsNotNone(cls.attributes_dict['name'])
+		self.assertIsNotNone(cls.attributes_dict['parent_env'])
+		self.assertIsNotNone(cls.attributes_dict['mass'])
+		self.assertIsNotNone(cls.attributes_dict['volume'])
+
+		for k, v in cls.attributes_dict.items():
+			self.assertIsInstance(v, tuple)
+			self.assertEqual(len(v), 2)
+			self.assertIsInstance(v[0], type(lambda x: x))
 
 
 if __name__ == '__main__':
