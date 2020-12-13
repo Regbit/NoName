@@ -27,9 +27,9 @@ class CargoTest(TestCase):
 			self.assertEqual(len(v), 2)
 			self.assertIsInstance(v[0], type(lambda x: x))
 
-	def test_cargo_make_empty(self):
+	def test_cargo_init_empty(self):
 		cls = Cargo
-		c = cls.make()
+		c = cls()
 		self.assertIsNotNone(c)
 
 		self.assertIsNotNone(c.item_dict)
@@ -38,32 +38,33 @@ class CargoTest(TestCase):
 		self.assertEqual(len(cls.entity_list), 1)
 		self.assertIs(cls.entity_list[0], c)
 
-	def test_cargo_make_with_attributes(self):
+	def test_cargo_init_with_attributes(self):
 		cls = Cargo
 		name = 'Cargo'
 		parent_env = Entity()
 		item_dict = dict()
-		c = cls.make(name=name, parent_env=parent_env, item_dict=item_dict)
+		c = cls(name=name, parent_env=parent_env, item_dict=item_dict)
 
 		self.assertIsNotNone(c)
 		self.assertEqual(c.name, name)
 		self.assertEqual(c.parent_env, parent_env)
 		self.assertEqual(c.item_dict, item_dict)
 
-		self.assertEqual(len(cls.entity_list), 1)
-		self.assertIs(cls.entity_list[0], c)
+		self.assertEqual(len(cls.entity_list), 2)
+		self.assertIs(cls.entity_list[0], parent_env)
+		self.assertIs(cls.entity_list[1], c)
 
-	def test_cargo_make_with_items(self):
+	def test_cargo_init_with_items(self):
 		cls = Cargo
 		item_dict = dict()
 
-		i_1 = Item.make(name='Item 1', mass=1, volume=1)
-		i_2 = Item.make(name='Item 2', mass=2, volume=2)
+		i_1 = Item(name='Item 1', mass=1, volume=1)
+		i_2 = Item(name='Item 2', mass=2, volume=2)
 
 		item_dict[i_1] = 1
 		item_dict[i_2] = 2
 
-		c = cls.make(item_dict=item_dict)
+		c = cls(item_dict=item_dict)
 
 		self.assertIsNotNone(c)
 		self.assertEqual(c.item_dict, item_dict)

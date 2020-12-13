@@ -48,7 +48,7 @@ class Rover(Vehicle, ABC):
 				'mass': 2500,
 				'volume': 25,
 				'max_speed': 230,
-				'storage': Storage.make(capacity={Goods: 5, Ore: 0.0, Gas: 0.0}),
+				'storage': Storage(capacity={Goods: 5, Ore: 0.0, Gas: 0.0}),
 				'max_payload_mass': 1500
 			}
 		elif cls is ScavengerMKII:
@@ -57,7 +57,7 @@ class Rover(Vehicle, ABC):
 				'mass': 2200,
 				'volume': 24,
 				'max_speed': 280,
-				'storage': Storage.make(capacity={Goods: 7.5, Ore: 0.0, Gas: 0.0}),
+				'storage': Storage(capacity={Goods: 7.5, Ore: 0.0, Gas: 0.0}),
 				'max_payload_mass': 1750
 			}
 		else:

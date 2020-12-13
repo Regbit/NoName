@@ -19,7 +19,7 @@ class Entity(ABC):
 
 	def __init__(self, **kwargs):
 		"""
-
+		Initialization of an object. New object added to Entity.entity_list.
 		:param kwargs: {
 			name: str,
 			parent_env: Entity
@@ -39,12 +39,11 @@ class Entity(ABC):
 					raise AttributeTypeError(f'Attribute {name} was not set! Input value: {kwargs.get(name)}')
 				else:
 					self.__setattr__(name, deepcopy(meta[1]))
+			self.entity_list.append(self)
 		except AttributeTypeError as err:
 			# TODO Figure out what tot do here. Maybe use Logger.
-			# print(err)
 			pass
 
-		self.entity_list.append(self)
 
 	@property
 	def obj_info_short(self):
@@ -60,22 +59,6 @@ class Entity(ABC):
 	@classmethod
 	def attributes_dict_copy(cls):
 		return deepcopy(cls.attributes_dict)
-
-	@classmethod
-	def make(cls, **kwargs):
-		"""
-		Safe initialization of an object. New object added to Entity.entity_list.
-		:param kwargs: see __init__ description
-		:return:
-		"""
-		try:
-			new = cls(**kwargs)
-			cls.entity_list.append(new)
-			return new
-		except AttributeTypeError as err:
-			# TODO Figure out what tot do here. Maybe use Logger.
-			# print(err)
-			pass
 
 	@classmethod
 	def delete(cls, *args):
@@ -157,7 +140,7 @@ class WorldEntity(MassedEntity, ABC):
 		super().__init__(**kwargs)
 
 	def set_destination(self, destination):
-		if isinstance(destination, Entity):
+		if isinstance(destination, WorldEntity):
 			self.destination_pos = destination.pos
 		elif isinstance(destination, Vector3):
 			self.destination_pos = destination

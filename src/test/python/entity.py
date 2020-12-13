@@ -30,20 +30,18 @@ class EntityTest(TestCase):
 			self.assertEqual(len(v), 2)
 			self.assertIsInstance(v[0], type(lambda x: x))
 
-	def test_entity_object_init(self):
+	def test_entity_init(self):
+		cls = Entity
 		e = Entity()
 		self.assertIsNotNone(e)
 
 		self.assertIsNone(e.name)
 		self.assertIsNone(e.parent_env)
 
-	def test_entity_object_init_entity_list_empty(self):
-		cls = Entity
-		e = Entity()
 		self.assertIsNotNone(e)
-		self.assertEqual(len(cls.entity_list), 0)
+		self.assertEqual(len(cls.entity_list), 1)
 
-	def test_entity_object_init_with_attributes(self):
+	def test_entity_init_with_attributes(self):
 		name = 'Entity'
 		parent_env = Entity()
 
@@ -53,17 +51,18 @@ class EntityTest(TestCase):
 		self.assertEqual(e.name, name)
 		self.assertEqual(e.parent_env, parent_env)
 
-	def test_entity_object_init_with_faulty_attributes(self):
+	def test_entity_init_with_faulty_attributes(self):
 		name = 123
 		parent_env = 'name'
-		e = None
+		e = Entity(name=name, parent_env=parent_env)
 
-		with self.assertRaises(AttributeTypeError):
-			e = Entity(name=name, parent_env=parent_env)
+		self.assertIsNotNone(e)
+		self.assertIsNot(e.name, name)
+		self.assertIsNot(e.parent_env, parent_env)
 
-		self.assertIsNone(e)
+		self.assertEqual(len(Entity.entity_list), 0)
 
-	def test_entity_object_init_with_nonexistent_attributes(self):
+	def test_entity_init_with_nonexistent_attributes(self):
 		name = 'Entity'
 		parent_env = Entity()
 		nonexistent_attribute = 1
@@ -87,62 +86,9 @@ class EntityTest(TestCase):
 		for k, v in attributes_dict_copy.items():
 			self.assertEqual(v, cls.attributes_dict[k])
 
-	def test_entity_make_empty(self):
-		cls = Entity
-		e = cls.make()
-
-		self.assertIsNotNone(e)
-
-		self.assertIsNone(e.name)
-		self.assertIsNone(e.parent_env)
-
-		self.assertEqual(len(cls.entity_list), 1)
-		self.assertIs(cls.entity_list[0], e)
-
-	def test_entity_make_with_attributes(self):
-		cls = Entity
-		name = 'Entity'
-		parent_env = Entity()
-		e = cls.make(name=name, parent_env=parent_env)
-
-		self.assertIsNotNone(e)
-		self.assertEqual(e.name, name)
-		self.assertEqual(e.parent_env, parent_env)
-
-		self.assertEqual(len(cls.entity_list), 1)
-		self.assertIs(cls.entity_list[0], e)
-
-	def test_entity_make_with_faulty_attributes(self):
-		cls = Entity
-		name = 123
-		parent_env = 'name'
-		e = None
-
-		e = cls.make(name=name, parent_env=parent_env)
-
-		self.assertIsNone(e)
-
-		self.assertEqual(len(cls.entity_list), 0)
-
-	def test_entity_make_with_nonexistent_attributes(self):
-		cls = Entity
-		name = 'Entity'
-		parent_env = Entity()
-		nonexistent_attribute = 1
-
-		e = cls.make(name=name, parent_env=parent_env, nonexistent_attribute=nonexistent_attribute)
-		self.assertIsNotNone(e)
-
-		self.assertIsNotNone(e.name)
-		self.assertEqual(e.name, name)
-		self.assertEqual(e.parent_env, parent_env)
-
-		with self.assertRaises(AttributeError):
-			e.nonexistent_attribute
-
 	def test_entity_delete_one(self):
 		cls = Entity
-		e = cls.make()
+		e = cls()
 
 		self.assertIsNotNone(e)
 		self.assertEqual(len(cls.entity_list), 1)
@@ -156,9 +102,9 @@ class EntityTest(TestCase):
 
 	def test_entity_delete_multiple(self):
 		cls = Entity
-		e_1 = cls.make()
-		e_2 = cls.make()
-		e_3 = cls.make()
+		e_1 = cls()
+		e_2 = cls()
+		e_3 = cls()
 
 		self.assertIsNotNone(e_1)
 		self.assertIsNotNone(e_2)
@@ -183,8 +129,8 @@ class EntityTest(TestCase):
 	@skip
 	def _test_entity_delete_parent(self):
 		cls = Entity
-		e_par = cls.make()
-		e_ch = cls.make(parent_env=e_par)
+		e_par = cls()
+		e_ch = cls(parent_env=e_par)
 
 		self.assertIsNotNone(e_par)
 		self.assertIsNotNone(e_ch)

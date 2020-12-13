@@ -7,8 +7,8 @@ from tools import set_attribute_for_all_elements
 
 
 def common_test_1():
-	pl = Planet.make(name='The Planet', mass=1.0, density=1.0)
-	b = Building.make(name='Some Building', parent_env=pl)
+	pl = Planet(name='The Planet', mass=1.0, density=1.0)
+	b = Building(name='Some Building', parent_env=pl)
 	print(f"{b}, {b.parent_env}, {pl.radius}")
 
 
@@ -28,9 +28,9 @@ def storage_test_1():
 
 
 def storage_test_2():
-	st = Storage.make(capacity={Goods: 100, Ore: 0, Gas: 0})
-	c_1 = Cargo.make(item_list=[IronBar.make(quantity=50000)])
-	c_2 = Cargo.make(item_list=[IronBar.make(quantity=30)])
+	st = Storage(capacity={Goods: 100, Ore: 0, Gas: 0})
+	c_1 = Cargo(item_list=[IronBar(quantity=50000)])
+	c_2 = Cargo(item_list=[IronBar(quantity=30)])
 
 	print(st)
 	st.expect_cargo(c_1)
@@ -52,9 +52,9 @@ def storage_test_2():
 
 
 def rover_test_1():
-	r_1 = ScavengerMKI.make()
-	r_2 = ScavengerMKI.make()
-	r_3 = ScavengerMKII.make()
+	r_1 = ScavengerMKI()
+	r_2 = ScavengerMKI()
+	r_3 = ScavengerMKII()
 
 	print(r_1)
 	print(r_2)
@@ -65,8 +65,8 @@ def rover_test_1():
 
 
 def tools_test_1():
-	lst = [Entity.make(), Entity.make(), Entity.make()]
-	par = Entity.make()
+	lst = [Entity(), Entity(), Entity()]
+	par = Entity()
 	set_attribute_for_all_elements(lst, 'parent_env', par)
 
 	for e in lst:
