@@ -16,6 +16,7 @@ class Entity(ABC):
 	attributes_dict = dict()
 	attributes_dict['name'] = lambda x: isinstance(x, str), None
 	attributes_dict['parent_env'] = lambda x: issubclass(type(x), Entity), None
+	base_name = 'Entity'
 
 	def __init__(self, **kwargs):
 		"""
@@ -30,7 +31,7 @@ class Entity(ABC):
 			self.name: str = None
 			self.parent_env: Entity = None
 
-			kwargs.update(self.class_desc())
+			# kwargs.update(self.class_desc())
 
 			for name, meta in self.attributes_dict.items():
 				if kwargs.get(name) and meta[0](kwargs.get(name)):
@@ -44,10 +45,9 @@ class Entity(ABC):
 			# TODO Figure out what tot do here. Maybe use Logger.
 			pass
 
-
 	@property
 	def obj_info_short(self):
-		return f"{type(self).__name__} #..{str(self.__hash__())[-5:]}"
+		return f"{self.base_name} #..{str(self.__hash__())[-5:]}"
 
 	@property
 	def obj_info(self):
@@ -82,25 +82,22 @@ class Entity(ABC):
 
 class MassedEntity(Entity, ABC):
 	"""
-	Extension of Entity class to represent physically affective entities
+	Extension of Entity class to represent entities affected by physics
 	"""
 
 	attributes_dict = Entity.attributes_dict_copy()
-	attributes_dict['mass'] = lambda x: isinstance(x, (float, int)) and x > 0, 0.0
-	attributes_dict['volume'] = lambda x: isinstance(x, (float, int)) and x > 0, 0.0
+	base_name = 'Massed Entity'
+	mass = 0.0
+	volume = 0.0
 
 	def __init__(self, **kwargs):
 		"""
 
 		:param kwargs: {
 			name: str,
-			parent_env: Entity,
-			mass: float,
-			volume: float
+			parent_env: Entity
 		}
 		"""
-		self.mass: float = None
-		self.volume: float = None
 		super().__init__(**kwargs)
 
 	def __str__(self):
@@ -117,6 +114,10 @@ class WorldEntity(MassedEntity, ABC):
 	attributes_dict['can_move'] = lambda x: isinstance(x, bool), True
 	attributes_dict['destination_pos'] = lambda x: isinstance(x, Vector3), Vector3()
 	attributes_dict['max_speed'] = lambda x: isinstance(x, (float, int)) and x > 0, 0.0
+	base_name = 'World Entity'
+	mass = 0.0
+	volume = 0.0
+	max_speed = 0.0
 
 	def __init__(self, **kwargs):
 		"""
@@ -124,19 +125,15 @@ class WorldEntity(MassedEntity, ABC):
 		:param kwargs: {
 			name: str,
 			parent_env: Entity,
-			mass: float,
-			volume: float,
 			pos: Vector3,
 			can_move: bool,
-			destination_pos: Vector3,
-			max_speed: float
+			destination_pos: Vector3
 		}
 		"""
 
 		self.pos: Vector3 = None
 		self.can_move: bool = None
 		self.destination_pos: Vector3 = None
-		self.max_speed: float = None
 		super().__init__(**kwargs)
 
 	def set_destination(self, destination):

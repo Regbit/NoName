@@ -30,6 +30,8 @@ class EntityTest(TestCase):
 			self.assertEqual(len(v), 2)
 			self.assertIsInstance(v[0], type(lambda x: x))
 
+		self.assertEqual(cls.base_name, 'Entity')
+
 	def test_entity_init(self):
 		cls = Entity
 		e = Entity()
@@ -169,16 +171,17 @@ class MassedEntityTest(TestCase):
 		self.assertIsInstance(cls.attributes_dict, dict)
 		self.assertGreater(len(cls.attributes_dict), 0)
 
-		self.assertEqual(set(cls.attributes_dict.keys()), {'name', 'parent_env', 'mass', 'volume'})
+		self.assertEqual(set(cls.attributes_dict.keys()), {'name', 'parent_env'})
 		self.assertIsNotNone(cls.attributes_dict['name'])
 		self.assertIsNotNone(cls.attributes_dict['parent_env'])
-		self.assertIsNotNone(cls.attributes_dict['mass'])
-		self.assertIsNotNone(cls.attributes_dict['volume'])
 
 		for k, v in cls.attributes_dict.items():
 			self.assertIsInstance(v, tuple)
 			self.assertEqual(len(v), 2)
 			self.assertIsInstance(v[0], type(lambda x: x))
+
+		self.assertIsNotNone(cls.mass)
+		self.assertIsNotNone(cls.volume)
 
 
 if __name__ == '__main__':

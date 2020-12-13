@@ -1,5 +1,5 @@
 from src.main.python.entity.entity import Entity
-from src.main.python.entity.item import Item, Goods, Ore, Gas
+from src.main.python.entity.item import Goods, Ore, Gas
 from tools import set_attribute_for_all_elements
 
 
@@ -11,13 +11,15 @@ class Cargo(Entity):
 	attributes_dict = Entity.attributes_dict_copy()
 	attributes_dict['item_dict'] = lambda x: isinstance(x, dict), dict()
 
+	base_name = 'Cargo'
+
 	def __init__(self, **kwargs):
 		"""
 
 		:param kwargs: {
 			name: str,
 			parent_env: Entity,
-			item_dict: dict
+			item_dict: dict(Item(cls), float)
 		}
 		"""
 
@@ -36,7 +38,7 @@ class Cargo(Entity):
 		:param cls: Goods, Ore or Gas
 		:return:
 		"""
-		return [i for i in self.item_dict if issubclass(i.__class__, cls)]
+		return {k: v for k, v in self.item_dict.items() if issubclass(k.__class__, cls)}
 
 	def get_total_mass_by_class(self, cls):
 		"""
@@ -44,7 +46,7 @@ class Cargo(Entity):
 		:param cls: Goods, Ore or Gas
 		:return:
 		"""
-		return sum([i.total_mass for i in self.item_dict if issubclass(i.__class__, cls)])
+		return sum([k.mass * v for k, v in self.item_dict.items() if issubclass(k.__class__, cls)])
 
 	def get_total_volume_by_class(self, cls):
 		"""
@@ -52,7 +54,7 @@ class Cargo(Entity):
 		:param cls: Goods, Ore or Gas
 		:return:
 		"""
-		return sum([i.total_volume for i in self.item_dict if issubclass(i.__class__, cls)])
+		return sum([k.volume * v for k, v in self.item_dict.items() if issubclass(k.__class__, cls)])
 
 
 class NotEnoughSpaceError(Exception):
@@ -88,6 +90,8 @@ class Storage(Entity):
 	attributes_dict['capacity'] = lambda x: isinstance(x, dict) and set(x.keys()) == set(Storage.storage_types_tuple) and bool(sum(x.values())), {Goods: 0.0, Ore: 0.0, Gas: 0.0}
 	attributes_dict['reserved_cargo'] = lambda x: isinstance(x, list) and x[0] and isinstance(x[0], Cargo), list()
 	attributes_dict['expected_cargo'] = lambda x: isinstance(x, list) and x[0] and isinstance(x[0], Cargo), list()
+
+	base_name = 'Storage'
 
 	def __init__(self, **kwargs):
 		"""

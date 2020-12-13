@@ -1,5 +1,5 @@
 from unittest import TestCase, main, skip
-from src.main.python.entity.entity import Entity
+from src.main.python.entity.item import *
 from src.main.python.entity.storage import *
 
 
@@ -58,8 +58,8 @@ class CargoTest(TestCase):
 		cls = Cargo
 		item_dict = dict()
 
-		i_1 = Item(name='Item 1', mass=1, volume=1)
-		i_2 = Item(name='Item 2', mass=2, volume=2)
+		i_1 = IronBar
+		i_2 = IronOre
 
 		item_dict[i_1] = 1
 		item_dict[i_2] = 2
@@ -68,6 +68,8 @@ class CargoTest(TestCase):
 
 		self.assertIsNotNone(c)
 		self.assertEqual(c.item_dict, item_dict)
+		self.assertTrue(i_1 in c.item_dict)
+		self.assertTrue(i_2 in c.item_dict)
 
 
 @skip

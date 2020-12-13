@@ -4,45 +4,33 @@ from src.main.python.entity.entity import MassedEntity
 
 class Item(MassedEntity, ABC):
 
-	def update(self):
-		pass
+	base_name = 'Item'
 
 
 class Goods(Item, ABC):
 
-	@classmethod
-	def class_desc(cls):
-		if cls is IronBar:
-			return {
-				'name': 'Iron bar',
-				'mass': 1,
-				'volume': 0.001
-			}
-		else:
-			return {}
+	base_name = 'Goods'
 
 
-class IronBar(Goods):
-	pass
+class IronBar(Goods, ABC):
+
+	base_name = 'Iron bar'
+	mass = 1
+	volume = 0.001
 
 
 class Ore(Item, ABC):
 
-	@classmethod
-	def class_desc(cls):
-		if cls is IronOre:
-			return {
-				'name': 'Iron ore',
-				'mass': 1000,
-				'volume': 0.1
-			}
-		else:
-			return {}
+	base_name = 'Ore'
 
 
-class IronOre(Ore):
-	pass
+class IronOre(Ore, ABC):
+
+	base_name = 'Iron ore'
+	mass = 1000
+	volume = 0.1
 
 
 class Gas(Item, ABC):
-	pass
+
+	base_name = 'Gas'

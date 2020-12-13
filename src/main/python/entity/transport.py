@@ -8,7 +8,9 @@ class Vehicle(WorldEntity, ABC):
 
 	attributes_dict = WorldEntity.attributes_dict_copy()
 	attributes_dict['storage'] = lambda x: isinstance(x, Storage), Storage()
-	attributes_dict['max_payload_mass'] = lambda x: isinstance(x, (float, int)) and x > 0, 0.0
+	base_name = 'Vehicle'
+	max_payload_mass = 0.0
+	storage_capacity = {Goods: 0.0, Ore: 0.0, Gas: 0.0}
 
 	def __init__(self, **kwargs):
 		"""
@@ -16,19 +18,16 @@ class Vehicle(WorldEntity, ABC):
 		:param kwargs: {
 			name: str,
 			parent_env: Entity,
-			mass: float,
-			volume: float,
 			pos: Vector3,
-			destination_pos: Vector3,
-			max_speed: float,
-			storage: Storage,
-			max_payload_mass: float
+			destination_pos: Vector3
+			storage: Storage
 		}
 		"""
 		self.storage = None
 		self.max_payload_mass = None
+		kwargs['storage'] = Storage(capacity=self.storage_capacity)
+		kwargs['storage'].parent_env = self
 		super().__init__(**kwargs)
-		self.storage.parent_env = self
 
 	@property
 	def total_mass(self):
@@ -40,33 +39,24 @@ class Vehicle(WorldEntity, ABC):
 
 class Rover(Vehicle, ABC):
 
-	@classmethod
-	def class_desc(cls):
-		if cls is ScavengerMKI:
-			return {
-				'name': 'Scavenger MKI',
-				'mass': 2500,
-				'volume': 25,
-				'max_speed': 230,
-				'storage': Storage(capacity={Goods: 5, Ore: 0.0, Gas: 0.0}),
-				'max_payload_mass': 1500
-			}
-		elif cls is ScavengerMKII:
-			return {
-				'name': 'Scavenger MKII',
-				'mass': 2200,
-				'volume': 24,
-				'max_speed': 280,
-				'storage': Storage(capacity={Goods: 7.5, Ore: 0.0, Gas: 0.0}),
-				'max_payload_mass': 1750
-			}
-		else:
-			return dict()
+	base_name = 'Rover'
 
 
 class ScavengerMKI(Rover):
-	pass
+
+	base_name = 'Scavenger MKI'
+	mass = 2500.0
+	volume = 25.0
+	max_speed = 230.0
+	max_payload_mass = 1500.0
+	storage_capacity = {Goods: 5, Ore: 0.0, Gas: 0.0}
 
 
 class ScavengerMKII(Rover):
-	pass
+
+	base_name = 'Scavenger MKII'
+	mass = 2200.0
+	volume = 24.0
+	max_speed = 280.0
+	max_payload_mass = 1750.0
+	storage_capacity = {Goods: 7.5, Ore: 0.0, Gas: 0.0}
