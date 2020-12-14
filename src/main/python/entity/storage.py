@@ -77,21 +77,21 @@ class Cargo(Entity):
 		return self
 
 	@property
-	def mass(self):
+	def mass(self) -> float:
 		return sum(item.mass * qty for item, qty in self.item_dict.items())
 
 	@property
-	def volume(self):
+	def volume(self) -> float:
 		return sum(item.volume * qty for item, qty in self.item_dict.items())
 
 	@property
-	def is_empty(self):
+	def is_empty(self) -> bool:
 		return not bool(len(self.item_dict))
 
-	def has_item(self, item_class):
+	def has_item(self, item_class) -> bool:
 		return item_class in self.item_dict
 
-	def get_all_by_class(self, cls):
+	def get_all_by_class(self, cls) -> dict:
 		"""
 
 		:param cls: Goods, Ore or Gas
@@ -99,7 +99,7 @@ class Cargo(Entity):
 		"""
 		return {k: v for k, v in self.item_dict.items() if issubclass(k, cls)}
 
-	def get_total_mass_by_class(self, cls):
+	def get_total_mass_by_class(self, cls) -> float:
 		"""
 
 		:param cls: Goods, Ore or Gas
@@ -107,7 +107,7 @@ class Cargo(Entity):
 		"""
 		return sum([k.mass * v for k, v in self.item_dict.items() if issubclass(k, cls)])
 
-	def get_total_volume_by_class(self, cls):
+	def get_total_volume_by_class(self, cls) -> float:
 		"""
 
 		:param cls: Goods, Ore or Gas
@@ -165,10 +165,10 @@ class Storage(Entity):
 		}
 		"""
 
-		self.capacity = None
-		self.stored_cargo = None
-		self.reserved_cargo_list = None
-		self.expected_cargo_list = None
+		self.capacity: dict = None
+		self.stored_cargo: Cargo = None
+		self.reserved_cargo_list: list = None
+		self.expected_cargo_list: list = None
 
 		for attr in ('stored_cargo', 'reserved_cargo_list', 'expected_cargo_list'):
 			if attr in kwargs:
@@ -179,30 +179,34 @@ class Storage(Entity):
 		self.stored_cargo.parent_env = self
 
 	@property
-	def obj_info(self):
+	def obj_info(self) -> str:
 		capacity = '; '.join([f'{k.__name__}: {v}' for k, v in self.capacity.items()])
 		reserved_space = '; '.join([f'{t.__name__}: {self.get_reserved_space_by_class(t)}' for t in self.storage_types_tuple])
 		filled_space = '; '.join([f'{t.__name__}: {self.get_filled_space_by_class(t)}' for t in self.storage_types_tuple])
 		available_space = '; '.join([f'{t.__name__}: {self.get_available_space_by_class(t)}' for t in self.storage_types_tuple])
-		items = '\n\t\t'.join([str(i) for i in self.stored_cargo])
+		items = '\n\t\t'.join([str(i) + f"({q})" for i, q in self.stored_cargo.item_dict.items()])
 		return f"{super().obj_info}:\n\tC=({capacity});\n\tRS=({reserved_space});\n\tOS=({filled_space});\n\tAS=({available_space});\n\t\t{items}"
 
 	def __str__(self):
 		return f"{self.obj_info_short}:"
 
 	@property
-	def is_empty(self):
+	def is_empty(self) -> bool:
 		return self.stored_cargo.is_empty
 
 	@property
-	def total_stored_mass(self):
+	def total_stored_mass(self) -> float:
 		return self.stored_cargo.mass
 
 	@property
-	def total_stored_volume(self):
+	def total_stored_volume(self) -> float:
 		return self.stored_cargo.volume
 
-	def get_filled_space_by_class(self, cls):
+	@property
+	def available_cargo(self) -> Cargo:
+		return self.stored_cargo - sum(self.reserved_cargo_list)
+
+	def get_filled_space_by_class(self, cls) -> float:
 		"""
 		Returns total filled space by stored cargo by class
 		:param cls: Goods, Ore or Gas
@@ -210,7 +214,7 @@ class Storage(Entity):
 		"""
 		return self.stored_cargo.get_total_volume_by_class(cls)
 
-	def get_reserved_space_by_class(self, cls):
+	def get_reserved_space_by_class(self, cls) -> float:
 		"""
 		Returns total reserved space by incoming cargo by class
 		:param cls: Goods, Ore or Gas
@@ -218,7 +222,7 @@ class Storage(Entity):
 		"""
 		return sum([c.get_total_volume_by_class(cls) for c in self.expected_cargo_list])
 
-	def get_occupied_space_by_class(self, cls):
+	def get_occupied_space_by_class(self, cls) -> float:
 		"""
 		Returns sum of total filled space by stored cargo and total reserved space by incoming cargo by class
 		:param cls: Goods, Ore or Gas
@@ -226,7 +230,7 @@ class Storage(Entity):
 		"""
 		return self.get_filled_space_by_class(cls) + self.get_reserved_space_by_class(cls)
 
-	def get_available_space_by_class(self, cls):
+	def get_available_space_by_class(self, cls) -> float:
 		"""
 		Returns value of available for use space by class
 		:param cls: Goods, Ore or Gas
@@ -234,7 +238,7 @@ class Storage(Entity):
 		"""
 		return self.capacity[cls] - self.get_occupied_space_by_class(cls)
 
-	def expect_cargo(self, cargo: Cargo):
+	def expect_cargo(self, cargo: Cargo) -> bool:
 		"""
 
 		:param cargo: Cargo (an item set) to reserve space for
@@ -251,7 +255,7 @@ class Storage(Entity):
 
 		return True
 
-	def store_cargo(self, cargo: Cargo):
+	def store_cargo(self, cargo: Cargo) -> bool:
 		"""
 
 		:param cargo: Cargo (an item set) to store
