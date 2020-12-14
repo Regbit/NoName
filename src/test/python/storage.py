@@ -167,6 +167,215 @@ class CargoTest(NoNameTestCase):
 
 		self.assertEqual(len(Entity.entity_list), 2)
 
+	def test_cargo_sub_success(self):
+		cls = Cargo
+		item_dict = dict()
+
+		i = IronBar
+		i_qty_1 = 2
+
+		item_dict[i] = i_qty_1
+
+		c_1 = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c_1)
+
+		item_dict = dict()
+
+		i_qty_2 = 1
+
+		item_dict[i] = i_qty_2
+
+		c_2 = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c_2)
+
+		c_3 = c_1 - c_2
+
+		self.assertIsNotNone(c_3)
+		self.assertFalse(c_3.is_empty)
+		self.assertIsNot(c_3.item_dict, c_1.item_dict)
+		self.assertIsNot(c_3.item_dict, c_2.item_dict)
+		self.assertTrue(i in c_3.item_dict)
+
+		self.assertEqual(c_3.mass, i.mass * i_qty_1 - i.mass * i_qty_2)
+		self.assertEqual(c_3.mass, c_1.mass - c_2.mass)
+		self.assertEqual(c_3.volume, i.volume * i_qty_1 - i.volume * i_qty_2)
+		self.assertEqual(c_3.volume, c_1.volume - c_2.volume)
+
+		self.assertEqual(len(Entity.entity_list), 3)
+
+	def test_cargo_sub_failure_no_item(self):
+		cls = Cargo
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		item_dict[i_1] = i_1_qty
+
+		c_1 = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c_1)
+
+		item_dict = dict()
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_2] = i_2_qty
+
+		c_2 = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c_2)
+
+		c_3 = None
+
+		with self.assertRaises(CargoSubtractionError):
+			c_3 = c_1 - c_2
+
+		self.assertIsNone(c_3)
+
+		self.assertEqual(len(Entity.entity_list), 2)
+
+	def test_cargo_sub_failure_not_enough_units(self):
+		cls = Cargo
+		item_dict = dict()
+
+		i = IronBar
+		i_qty_1 = 1
+
+		item_dict[i] = i_qty_1
+
+		c_1 = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c_1)
+
+		item_dict = dict()
+
+		i_qty_2 = 2
+
+		item_dict[i] = i_qty_2
+
+		c_2 = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c_2)
+
+		c_3 = None
+
+		with self.assertRaises(CargoSubtractionError):
+			c_3 = c_1 - c_2
+
+		self.assertIsNone(c_3)
+
+		self.assertEqual(len(Entity.entity_list), 2)
+
+	def test_cargo_isub_success(self):
+		cls = Cargo
+		item_dict = dict()
+
+		i = IronBar
+		i_qty_1 = 2
+
+		item_dict[i] = i_qty_1
+
+		c_1 = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c_1)
+
+		item_dict = dict()
+
+		i_qty_2 = 1
+
+		item_dict[i] = i_qty_2
+
+		c_2 = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c_2)
+
+		c_1 -= c_2
+
+		self.assertIsNotNone(c_1)
+		self.assertFalse(c_1.is_empty)
+		self.assertIsNot(c_1.item_dict, c_2.item_dict)
+		self.assertTrue(i in c_1.item_dict)
+
+		self.assertEqual(c_1.mass, i.mass * i_qty_1 - i.mass * i_qty_2)
+		self.assertEqual(c_1.volume, i.volume * i_qty_1 - i.volume * i_qty_2)
+
+		self.assertEqual(len(Entity.entity_list), 2)
+
+	def test_cargo_isub_failure_no_item(self):
+		cls = Cargo
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		item_dict[i_1] = i_1_qty
+
+		c_1 = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c_1)
+
+		item_dict = dict()
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_2] = i_2_qty
+
+		c_2 = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c_2)
+
+		with self.assertRaises(CargoSubtractionError):
+			c_1 -= c_2
+
+		self.assertIsNotNone(c_1)
+		self.assertFalse(c_1.is_empty)
+		self.assertIsNot(c_1.item_dict, c_2.item_dict)
+		self.assertTrue(i_1 in c_1.item_dict)
+		self.assertEqual(c_1.item_dict[i_1], i_1_qty)
+
+		self.assertEqual(len(Entity.entity_list), 2)
+
+	def test_cargo_isub_failure_not_enough_units(self):
+		cls = Cargo
+		item_dict = dict()
+
+		i = IronBar
+		i_qty_1 = 1
+
+		item_dict[i] = i_qty_1
+
+		c_1 = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c_1)
+
+		item_dict = dict()
+
+		i_qty_2 = 2
+
+		item_dict[i] = i_qty_2
+
+		c_2 = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c_2)
+
+		c_3 = None
+
+		with self.assertRaises(CargoSubtractionError):
+			c_1 -= c_2
+
+		self.assertIsNotNone(c_1)
+		self.assertFalse(c_1.is_empty)
+		self.assertIsNot(c_1.item_dict, c_2.item_dict)
+		self.assertTrue(i in c_1.item_dict)
+		self.assertEqual(c_1.item_dict[i], i_qty_1)
+
+		self.assertEqual(len(Entity.entity_list), 2)
+
 	def test_cargo_get_all_by_class(self):
 		cls = Cargo
 		item_dict = dict()
