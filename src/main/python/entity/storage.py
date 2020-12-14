@@ -146,6 +146,13 @@ class CargoNotExpectedError(Exception):
 	pass
 
 
+class CanNotReleaseCargoError(Exception):
+	"""
+	Exception raised when Cargo can not be released from expected or reserved cargo lists
+	"""
+	pass
+
+
 class Storage(Entity):
 	"""
 	Class used to represent and manage storage of Entity
@@ -286,6 +293,21 @@ class Storage(Entity):
 
 		return True
 
+	def release_expected_cargo(self, cargo: Cargo):
+		"""
+		Releases (removes) expected cargo from expected_cargo_list if it was in there
+		:param cargo: Cargo (an item set) to release from expected cargo list
+		:return: True if successful
+		"""
+		res = False
+		if cargo in self.expected_cargo_list:
+			self.expected_cargo_list.remove(cargo)
+			res = True
+		else:
+			raise CanNotReleaseCargoError(f"Can not release cargo from expected cargo list since it was not expected!")
+
+		return res
+
 	def store_cargo(self, cargo: Cargo) -> bool:
 		"""
 		Attempts to store Cargo.
@@ -302,7 +324,7 @@ class Storage(Entity):
 		self.stored_cargo += cargo
 
 		# Free space
-		self.expected_cargo_list.remove(cargo)
+		self.release_expected_cargo(cargo)
 
 		# Delete cargo object
 		self.delete(cargo)
