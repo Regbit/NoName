@@ -409,6 +409,50 @@ class CargoTest(NoNameTestCase):
 		self.assertIsNotNone(items)
 		self.assertEqual(len(items), 0)
 
+	def test_cargo_mass(self):
+		cls = Cargo
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c)
+		self.assertFalse(c.is_empty)
+
+		self.assertEqual(c.mass, i_1.mass * i_1_qty + i_2.mass * i_2_qty)
+
+		self.assertEqual(len(Entity.entity_list), 1)
+
+	def test_cargo_volume(self):
+		cls = Cargo
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c)
+		self.assertFalse(c.is_empty)
+
+		self.assertEqual(c.volume, i_1.volume * i_1_qty + i_2.volume * i_2_qty)
+
+		self.assertEqual(len(Entity.entity_list), 1)
+
 	def test_cargo_get_total_mass_by_class(self):
 		cls = Cargo
 		item_dict = dict()
