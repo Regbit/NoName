@@ -453,6 +453,27 @@ class CargoTest(NoNameTestCase):
 
 		self.assertEqual(len(Entity.entity_list), 1)
 
+	def test_cargo_is_empty(self):
+		cls = Cargo
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c)
+		self.assertEqual(c.is_empty, not bool(len(c.item_dict)))
+		self.assertFalse(c.is_empty)
+
+		self.assertEqual(len(Entity.entity_list), 1)
+
 	def test_cargo_get_total_mass_by_class(self):
 		cls = Cargo
 		item_dict = dict()
