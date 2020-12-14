@@ -240,7 +240,8 @@ class Storage(Entity):
 
 	def expect_cargo(self, cargo: Cargo) -> bool:
 		"""
-
+		Attempts to add Cargo to expected_cargo_list for space reservation.
+		If there is not enough available space method raises NotEnoughSpaceError.
 		:param cargo: Cargo (an item set) to reserve space for
 		:return: True if successful
 		"""
@@ -257,7 +258,8 @@ class Storage(Entity):
 
 	def store_cargo(self, cargo: Cargo) -> bool:
 		"""
-
+		Attempts to store Cargo.
+		If Cargo was not expected (not in expected_cargo_list) then method raises CargoNotExpectedError.
 		:param cargo: Cargo (an item set) to store
 		:return: True if successful
 		"""
