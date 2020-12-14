@@ -1,6 +1,10 @@
 from src.main.python.entity.entity import Entity
-from src.main.python.entity.item import Goods, Ore, Gas
+from src.main.python.entity.item import Item, Goods, Ore, Gas
 from tools import set_attribute_for_all_elements
+
+
+class CargoSubtractionError(Exception):
+	pass
 
 
 class Cargo(Entity):
@@ -9,8 +13,7 @@ class Cargo(Entity):
 	Cargo is created when two Entities interact (item transfer)
 	"""
 	attributes_dict = Entity.attributes_dict_copy()
-	attributes_dict['item_dict'] = lambda x: isinstance(x, dict), dict()
-
+	attributes_dict['item_dict'] = lambda x: isinstance(x, dict) and len(x), dict()
 	base_name = 'Cargo'
 
 	def __init__(self, **kwargs):
@@ -25,12 +28,51 @@ class Cargo(Entity):
 
 		self.item_dict: dict = None
 		super().__init__(**kwargs)
-		self.mass = sum(item.mass * qty for item, qty in self.item_dict.items())
-		self.volume = sum(item.volume * qty for item, qty in self.item_dict.items())
 
 	def __str__(self):
-		items = '\n\t'.join([str(i) for i in self.item_dict.items()])
-		return f"{self.obj_info}:\n\t{items}"
+		items = '\n\t'.join([str(k.cls_name()) + f"; Q={v}" for k, v in self.item_dict.items()])
+		return f"{self.obj_info}" + (f":\n\t{items}" if len(self.item_dict) else "")
+
+	def __add__(self, other):
+		new_item_dict = dict()
+		for k in list(self.item_dict.keys()) + list(other.item_dict.keys()):
+			new_item_dict[k] = (self.item_dict.get(k) or 0) + (other.item_dict.get(k) or 0)
+		return Cargo(item_dict=new_item_dict)
+
+	def __iadd__(self, other):
+		new_item_dict = dict()
+		for k in list(self.item_dict.keys()) + list(other.item_dict.keys()):
+			new_item_dict[k] = (self.item_dict.get(k) or 0) + (other.item_dict.get(k) or 0)
+		self.item_dict.update(new_item_dict)
+		return self
+
+	def __sub__(self, other):
+		for k in other.keys():
+			if k not in self:
+				raise CargoSubtractionError(f"Cargo {self} does not have item {k} to subtract from!")
+
+		new_item_dict = dict()
+		for k in self.item_dict.keys():
+			diff = self.item_dict.get(k) - (other.item_dict.get(k) or 0)
+			if diff:
+				new_item_dict[k] = diff
+
+		return Cargo(item_dict=new_item_dict)
+
+	@property
+	def mass(self):
+		return sum(item.mass * qty for item, qty in self.item_dict.items())
+
+	@property
+	def volume(self):
+		return sum(item.volume * qty for item, qty in self.item_dict.items())
+
+	@property
+	def is_empty(self):
+		return not bool(len(self.item_dict))
+
+	def has_item(self, item_class):
+		return item_class in self.item_dict
 
 	def get_all_by_class(self, cls):
 		"""
@@ -38,7 +80,7 @@ class Cargo(Entity):
 		:param cls: Goods, Ore or Gas
 		:return:
 		"""
-		return {k: v for k, v in self.item_dict.items() if issubclass(k.__class__, cls)}
+		return {k: v for k, v in self.item_dict.items() if issubclass(k, cls)}
 
 	def get_total_mass_by_class(self, cls):
 		"""
@@ -46,7 +88,7 @@ class Cargo(Entity):
 		:param cls: Goods, Ore or Gas
 		:return:
 		"""
-		return sum([k.mass * v for k, v in self.item_dict.items() if issubclass(k.__class__, cls)])
+		return sum([k.mass * v for k, v in self.item_dict.items() if issubclass(k, cls)])
 
 	def get_total_volume_by_class(self, cls):
 		"""
@@ -54,7 +96,10 @@ class Cargo(Entity):
 		:param cls: Goods, Ore or Gas
 		:return:
 		"""
-		return sum([k.volume * v for k, v in self.item_dict.items() if issubclass(k.__class__, cls)])
+		return sum([k.volume * v for k, v in self.item_dict.items() if issubclass(k, cls)])
+
+	def update(self):
+		pass
 
 
 class NotEnoughSpaceError(Exception):
@@ -86,10 +131,10 @@ class Storage(Entity):
 	storage_types_tuple = (Goods, Ore, Gas)
 
 	attributes_dict = Entity.attributes_dict_copy()
-	attributes_dict['stored_items_list'] = lambda x: isinstance(x, list) and x[0] and issubclass(type(x[0]), list(Storage.storage_types_tuple)), list()
 	attributes_dict['capacity'] = lambda x: isinstance(x, dict) and set(x.keys()) == set(Storage.storage_types_tuple) and bool(sum(x.values())), {Goods: 0.0, Ore: 0.0, Gas: 0.0}
-	attributes_dict['reserved_cargo'] = lambda x: isinstance(x, list) and x[0] and isinstance(x[0], Cargo), list()
-	attributes_dict['expected_cargo'] = lambda x: isinstance(x, list) and x[0] and isinstance(x[0], Cargo), list()
+	attributes_dict['stored_cargo'] = lambda x: x != x, Cargo()
+	attributes_dict['reserved_cargo_list'] = lambda x: x != x, list()
+	attributes_dict['expected_cargo_list'] = lambda x: x != x, list()
 
 	base_name = 'Storage'
 
@@ -99,22 +144,22 @@ class Storage(Entity):
 		:param kwargs: {
 			name: str,
 			parent_env: Entity,
-			stored_items_list: list(Item),
-			capacity: dict{Goods: float, Ore: float, Gas: float},
-			reserved_cargo: list(Cargo),
-			expected_cargo: list(Cargo)
+			capacity: dict{Goods: float, Ore: float, Gas: float}
 		}
 		"""
 
-		self.stored_items_list = None
 		self.capacity = None
-		self.reserved_cargo = None
-		self.expected_cargo = None
+		self.stored_cargo = None
+		self.reserved_cargo_list = None
+		self.expected_cargo_list = None
+
+		for attr in ('stored_cargo', 'reserved_cargo_list', 'expected_cargo_list'):
+			if attr in kwargs:
+				kwargs.pop(attr)
 
 		super().__init__(**kwargs)
 
-		set_attribute_for_all_elements(self.stored_items_list, 'parent_env', self)
-		set_attribute_for_all_elements(self.reserved_cargo, 'parent_env', self)
+		self.stored_cargo.parent_env = self
 
 	@property
 	def obj_info(self):
@@ -122,23 +167,23 @@ class Storage(Entity):
 		reserved_space = '; '.join([f'{t.__name__}: {self.get_reserved_space_by_class(t)}' for t in self.storage_types_tuple])
 		filled_space = '; '.join([f'{t.__name__}: {self.get_filled_space_by_class(t)}' for t in self.storage_types_tuple])
 		available_space = '; '.join([f'{t.__name__}: {self.get_available_space_by_class(t)}' for t in self.storage_types_tuple])
-		items = '\n\t\t'.join([str(i) for i in self.stored_items_list])
+		items = '\n\t\t'.join([str(i) for i in self.stored_cargo])
 		return f"{super().obj_info}:\n\tC=({capacity});\n\tRS=({reserved_space});\n\tOS=({filled_space});\n\tAS=({available_space});\n\t\t{items}"
 
 	def __str__(self):
 		return f"{self.obj_info_short}:"
 
 	@property
-	def total_mass(self):
-		return sum([i.total_mass for i in self.stored_items_list])
+	def is_empty(self):
+		return self.stored_cargo.is_empty
 
-	def get_reserved_space_by_class(self, cls):
-		"""
-		Returns total reserved space by incoming cargo by class
-		:param cls: Goods, Ore or Gas
-		:return: float
-		"""
-		return sum([c.get_total_volume_by_class(cls) for c in self.expected_cargo])
+	@property
+	def total_stored_mass(self):
+		return self.stored_cargo.mass
+
+	@property
+	def total_stored_volume(self):
+		return self.stored_cargo.volume
 
 	def get_filled_space_by_class(self, cls):
 		"""
@@ -146,7 +191,15 @@ class Storage(Entity):
 		:param cls: Goods, Ore or Gas
 		:return: float
 		"""
-		return sum([i.total_volume for i in self.stored_items_list if issubclass(type(i), cls)])
+		return self.stored_cargo.get_total_volume_by_class(cls)
+
+	def get_reserved_space_by_class(self, cls):
+		"""
+		Returns total reserved space by incoming cargo by class
+		:param cls: Goods, Ore or Gas
+		:return: float
+		"""
+		return sum([c.get_total_volume_by_class(cls) for c in self.expected_cargo_list])
 
 	def get_occupied_space_by_class(self, cls):
 		"""
@@ -177,11 +230,11 @@ class Storage(Entity):
 										  f"Available space: {self.get_available_space_by_class(cls)}\n"
 										  f"Required space: {cargo.get_total_volume_by_class(cls)}")
 
-		self.expected_cargo.append(cargo)
+		self.expected_cargo_list.append(cargo)
 
 		return True
 
-	def store(self, cargo: Cargo):
+	def store_cargo(self, cargo: Cargo):
 		"""
 
 		:param cargo: Cargo (an item set) to store
@@ -189,22 +242,14 @@ class Storage(Entity):
 		"""
 
 		# Check if cargo expected
-		if cargo not in self.expected_cargo:
+		if cargo not in self.expected_cargo_list:
 			raise CargoNotExpectedError("Can not store cargo since it was not expected!")
 
 		# Store cargo
-		for item in cargo.item_list:
-			item.parent_env = self
-			for i in range(len(self.stored_items_list) + 1):
-				if i == len(self.stored_items_list):
-					self.stored_items_list.append(item)
-					break
-				if type(self.stored_items_list[i]) == type(item):
-					self.stored_items_list[i].quantity += item.quantity
-					break
+		self.stored_cargo += cargo
 
 		# Free space
-		self.expected_cargo.remove(cargo)
+		self.expected_cargo_list.remove(cargo)
 
 		# Delete cargo object
 		self.delete(cargo)

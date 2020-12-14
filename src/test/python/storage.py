@@ -1,12 +1,14 @@
-from unittest import TestCase, main, skip
+from unittest import main, skip
+from src.test.python.nonametest import NoNameTestCase
 from src.main.python.entity.item import *
 from src.main.python.entity.storage import *
+import logging
 
 
-class CargoTest(TestCase):
+logging.basicConfig(level=logging.INFO, format='[%(levelname)s] [%(asctime)s] [%(module)s.%(funcName)s] %(message)s')
 
-	def tearDown(self) -> None:
-		Entity.entity_list.clear()
+
+class CargoTest(NoNameTestCase):
 
 	def test_cargo_class_init(self):
 		cls = Cargo
@@ -27,14 +29,19 @@ class CargoTest(TestCase):
 			self.assertEqual(len(v), 2)
 			self.assertIsInstance(v[0], type(lambda x: x))
 
+		self.assertEqual(cls.base_name, 'Cargo')
+
 	def test_cargo_init_empty(self):
 		cls = Cargo
 		c = cls()
 		self.assertIsNotNone(c)
 
+		self.assertIsNone(c.name)
+		self.assertIsNone(c.parent_env)
+
 		self.assertIsNotNone(c.item_dict)
 		self.assertIsInstance(c.item_dict, dict)
-
+		self.assertTrue(c.is_empty)
 		self.assertEqual(len(cls.entity_list), 1)
 		self.assertIs(cls.entity_list[0], c)
 
@@ -59,24 +66,684 @@ class CargoTest(TestCase):
 		item_dict = dict()
 
 		i_1 = IronBar
-		i_2 = IronOre
+		i_1_qty = 1
 
-		item_dict[i_1] = 1
-		item_dict[i_2] = 2
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
 
 		c = cls(item_dict=item_dict)
 
 		self.assertIsNotNone(c)
+		self.assertFalse(c.is_empty)
 		self.assertEqual(c.item_dict, item_dict)
 		self.assertTrue(i_1 in c.item_dict)
 		self.assertTrue(i_2 in c.item_dict)
 
+		self.assertEqual(c.mass, i_1.mass * i_1_qty + i_2.mass * i_2_qty)
+		self.assertEqual(c.volume, i_1.volume * i_1_qty + i_2.volume * i_2_qty)
 
-@skip
-class StorageTest(TestCase):
+		self.assertEqual(len(Entity.entity_list), 1)
 
-	def tearDown(self) -> None:
-		Entity.entity_list.clear()
+	def test_cargo_add(self):
+		cls = Cargo
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		item_dict[i_1] = i_1_qty
+
+		c_1 = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c_1)
+
+		item_dict = dict()
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_2] = i_2_qty
+
+		c_2 = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c_2)
+
+		c_3 = c_1 + c_2
+
+		self.assertIsNotNone(c_3)
+		self.assertFalse(c_3.is_empty)
+		self.assertIsNot(c_3.item_dict, c_1.item_dict)
+		self.assertIsNot(c_3.item_dict, c_2.item_dict)
+		self.assertTrue(i_1 in c_3.item_dict)
+		self.assertTrue(i_1 not in c_2.item_dict)
+		self.assertTrue(i_2 in c_3.item_dict)
+		self.assertTrue(i_2 not in c_1.item_dict)
+
+		self.assertEqual(c_3.mass, i_1.mass * i_1_qty + i_2.mass * i_2_qty)
+		self.assertEqual(c_3.mass, c_1.mass + c_2.mass)
+		self.assertEqual(c_3.volume, i_1.volume * i_1_qty + i_2.volume * i_2_qty)
+		self.assertEqual(c_3.volume, c_1.volume + c_2.volume)
+
+		self.assertEqual(len(Entity.entity_list), 3)
+
+	def test_cargo_iadd(self):
+		cls = Cargo
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		item_dict[i_1] = i_1_qty
+
+		c_1 = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c_1)
+
+		item_dict = dict()
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_2] = i_2_qty
+
+		c_2 = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c_2)
+
+		c_1 += c_2
+
+		self.assertIsNotNone(c_1)
+		self.assertFalse(c_1.is_empty)
+		self.assertIsNot(c_1.item_dict, c_2.item_dict)
+		self.assertTrue(i_1 in c_1.item_dict)
+		self.assertTrue(i_1 not in c_2.item_dict)
+		self.assertTrue(i_2 in c_1.item_dict)
+
+		self.assertEqual(c_1.mass, i_1.mass * i_1_qty + i_2.mass * i_2_qty)
+		self.assertEqual(c_1.volume, i_1.volume * i_1_qty + i_2.volume * i_2_qty)
+
+		self.assertEqual(len(Entity.entity_list), 2)
+
+	def test_cargo_get_all_by_class(self):
+		cls = Cargo
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c)
+
+		items = c.get_all_by_class(Goods)
+		self.assertIsNotNone(items)
+		self.assertEqual(len(items), 1)
+		self.assertTrue(i_1 in items)
+		self.assertEqual(items[i_1], i_1_qty)
+
+		items = c.get_all_by_class(Ore)
+		self.assertIsNotNone(items)
+		self.assertEqual(len(items), 1)
+		self.assertTrue(i_2 in items)
+		self.assertEqual(items[i_2], i_2_qty)
+
+		items = c.get_all_by_class(Gas)
+		self.assertIsNotNone(items)
+		self.assertEqual(len(items), 0)
+
+	def test_cargo_get_total_mass_by_class(self):
+		cls = Cargo
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c)
+
+		items_mass = c.get_total_mass_by_class(Goods)
+		self.assertIsNotNone(items_mass)
+		self.assertEqual(items_mass, i_1.mass * i_1_qty)
+
+		items_mass = c.get_total_mass_by_class(Ore)
+		self.assertIsNotNone(items_mass)
+		self.assertEqual(items_mass, i_2.mass * i_2_qty)
+
+		items_mass = c.get_total_mass_by_class(Gas)
+		self.assertIsNotNone(items_mass)
+		self.assertEqual(items_mass, 0)
+
+	def test_cargo_get_total_volume_by_class(self):
+		cls = Cargo
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c = cls(item_dict=item_dict)
+
+		self.assertIsNotNone(c)
+
+		items_volume = c.get_total_volume_by_class(Goods)
+		self.assertIsNotNone(items_volume)
+		self.assertEqual(items_volume, i_1.volume * i_1_qty)
+
+		items_volume = c.get_total_volume_by_class(Ore)
+		self.assertIsNotNone(items_volume)
+		self.assertEqual(items_volume, i_2.volume * i_2_qty)
+
+		items_volume = c.get_total_volume_by_class(Gas)
+		self.assertIsNotNone(items_volume)
+		self.assertEqual(items_volume, 0)
+
+
+class StorageTest(NoNameTestCase):
+
+	def test_storage_class_init(self):
+		cls = Storage
+
+		self.assertIsNotNone(cls)
+
+		self.assertIsNotNone(cls.attributes_dict)
+		self.assertIsInstance(cls.attributes_dict, dict)
+		self.assertGreater(len(cls.attributes_dict), 0)
+
+		self.assertSetEqual(set(cls.attributes_dict.keys()), {
+			'name',
+			'parent_env',
+			'stored_cargo',
+			'capacity',
+			'reserved_cargo_list',
+			'expected_cargo_list'
+		})
+		self.assertIsNotNone(cls.attributes_dict['name'])
+		self.assertIsNotNone(cls.attributes_dict['parent_env'])
+		self.assertIsNotNone(cls.attributes_dict['stored_cargo'])
+		self.assertIsNotNone(cls.attributes_dict['capacity'])
+		self.assertIsNotNone(cls.attributes_dict['reserved_cargo_list'])
+		self.assertIsNotNone(cls.attributes_dict['expected_cargo_list'])
+
+		for k, v in cls.attributes_dict.items():
+			self.assertIsInstance(v, tuple)
+			self.assertEqual(len(v), 2)
+			self.assertIsInstance(v[0], type(lambda x: x))
+
+		self.assertEqual(cls.base_name, 'Storage')
+
+	def test_storage_init_empty(self):
+		cls = Storage
+		s = cls()
+		self.assertIsNotNone(s)
+
+		self.assertIsNotNone(s.capacity)
+		self.assertIsInstance(s.capacity, dict)
+		self.assertEqual(len(s.capacity), 3)
+		self.assertDictEqual(s.capacity, {Goods: 0.0, Ore: 0.0, Gas: 0.0})
+
+		self.assertIsNotNone(s.stored_cargo)
+		self.assertIsInstance(s.stored_cargo, Cargo)
+		self.assertIsInstance(Storage.attributes_dict['stored_cargo'][1], Cargo)
+		self.assertIsNot(s.stored_cargo, Storage.attributes_dict['stored_cargo'][1])
+		self.assertTrue(s.is_empty)
+
+		self.assertIsNotNone(s.reserved_cargo_list)
+		self.assertIsInstance(s.reserved_cargo_list, list)
+		self.assertEqual(len(s.reserved_cargo_list), 0)
+
+		self.assertIsNotNone(s.expected_cargo_list)
+		self.assertIsInstance(s.expected_cargo_list, list)
+		self.assertEqual(len(s.expected_cargo_list), 0)
+
+		self.assertIsNot(s.reserved_cargo_list, s.expected_cargo_list)
+
+		self.assertEqual(len(Entity.entity_list), 2)
+
+	def test_storage_init_with_attributes(self):
+		cls = Storage
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c = Cargo(item_dict=item_dict)
+
+		self.assertIsNotNone(c)
+
+		capacity = {Goods: 2000, Ore: 5000, Gas: 0}
+
+		s = cls(capacity=capacity, stored_cargo=c)
+
+		self.assertIsNotNone(s)
+
+		self.assertIsNotNone(s.capacity)
+		self.assertIsInstance(s.capacity, dict)
+		self.assertEqual(len(s.capacity), 3)
+		self.assertDictEqual(s.capacity, capacity)
+
+		self.assertIsNotNone(s.stored_cargo)
+		self.assertIsInstance(s.stored_cargo, Cargo)
+		self.assertIsInstance(Storage.attributes_dict['stored_cargo'][1], Cargo)
+		self.assertIsNot(s.stored_cargo, Storage.attributes_dict['stored_cargo'][1])
+		self.assertIsNot(s.stored_cargo, c)
+		self.assertTrue(s.is_empty)
+
+		self.assertEqual(len(Entity.entity_list), 3)
+
+	def test_storage_expect_cargo_success(self):
+		cls = Storage
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c = Cargo(item_dict=item_dict)
+
+		self.assertIsNotNone(c)
+
+		capacity = {Goods: 200, Ore: 500, Gas: 0}
+
+		for item_type in (Goods, Ore, Gas):
+			self.assertGreaterEqual(capacity[item_type], c.get_total_volume_by_class(item_type))
+
+		s = cls(capacity=capacity)
+
+		self.assertIsNotNone(s)
+
+		res = s.expect_cargo(c)
+
+		self.assertTrue(res)
+		self.assertIsNotNone(s.expected_cargo_list)
+		self.assertIsInstance(s.expected_cargo_list, list)
+		self.assertEqual(len(s.expected_cargo_list), 1)
+		self.assertIs(s.expected_cargo_list[0], c)
+
+		self.assertTrue(i_1 in s.expected_cargo_list[0].item_dict)
+		self.assertTrue(i_2 in s.expected_cargo_list[0].item_dict)
+
+		self.assertEqual(len(Entity.entity_list), 3)
+
+	def test_storage_expect_cargo_failure(self):
+		cls = Storage
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1500
+
+		i_2 = IronOre
+		i_2_qty = 250
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c = Cargo(item_dict=item_dict)
+
+		self.assertIsNotNone(c)
+
+		capacity = {Goods: 1, Ore: 1, Gas: 0}
+
+		for item_type in (Goods, Ore, Gas):
+			self.assertLessEqual(capacity[item_type], c.get_total_volume_by_class(item_type))
+
+		s = cls(capacity=capacity)
+
+		self.assertIsNotNone(s)
+
+		res = False
+
+		with self.assertRaises(NotEnoughSpaceError):
+			res = s.expect_cargo(c)
+
+		self.assertFalse(res)
+		self.assertIsNotNone(s.expected_cargo_list)
+		self.assertIsInstance(s.expected_cargo_list, list)
+		self.assertEqual(len(s.expected_cargo_list), 0)
+
+		self.assertEqual(len(Entity.entity_list), 3)
+
+	def test_storage_store_cargo_success(self):
+		cls = Storage
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c = Cargo(item_dict=item_dict)
+
+		self.assertIsNotNone(c)
+
+		capacity = {Goods: 200, Ore: 500, Gas: 0}
+
+		for item_type in (Goods, Ore, Gas):
+			self.assertGreaterEqual(capacity[item_type], c.get_total_volume_by_class(item_type))
+
+		s = cls(capacity=capacity)
+
+		self.assertIsNotNone(s)
+
+		s.expect_cargo(c)
+		res = s.store_cargo(c)
+
+		self.assertTrue(res)
+		self.assertIsNotNone(s.stored_cargo)
+		self.assertIsInstance(s.stored_cargo, Cargo)
+		self.assertIsNot(s.stored_cargo, c)
+
+		self.assertTrue(i_1 in s.stored_cargo.item_dict)
+		self.assertEqual(s.stored_cargo.item_dict[i_1], i_1_qty)
+		self.assertTrue(i_2 in s.stored_cargo.item_dict)
+		self.assertEqual(s.stored_cargo.item_dict[i_2], i_2_qty)
+
+		self.assertIsNotNone(s.expected_cargo_list)
+		self.assertIsInstance(s.expected_cargo_list, list)
+		self.assertEqual(len(s.expected_cargo_list), 0)
+
+		self.assertEqual(len(Entity.entity_list), 2)
+
+	def test_storage_store_cargo_failure(self):
+		cls = Storage
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c = Cargo(item_dict=item_dict)
+
+		self.assertIsNotNone(c)
+
+		capacity = {Goods: 200, Ore: 500, Gas: 0}
+
+		for item_type in (Goods, Ore, Gas):
+			self.assertGreaterEqual(capacity[item_type], c.get_total_volume_by_class(item_type))
+
+		s = cls(capacity=capacity)
+
+		self.assertIsNotNone(s)
+
+		res = False
+
+		with self.assertRaises(CargoNotExpectedError):
+			res = s.store_cargo(c)
+
+		self.assertFalse(res)
+		self.assertIsNotNone(s.stored_cargo)
+		self.assertEqual(len(s.stored_cargo.item_dict), 0)
+
+		self.assertEqual(len(Entity.entity_list), 3)
+
+	def test_storage_total_stored_mass(self):
+		cls = Storage
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c = Cargo(item_dict=item_dict)
+
+		self.assertIsNotNone(c)
+
+		capacity = {Goods: 2000, Ore: 5000, Gas: 0}
+
+		s = cls(capacity=capacity)
+
+		self.assertIsNotNone(s)
+		self.assertTrue(s.is_empty)
+
+		s.expect_cargo(c)
+		s.store_cargo(c)
+
+		self.assertIsNotNone(s.stored_cargo)
+		self.assertIsNot(s.stored_cargo, c)
+		self.assertFalse(s.is_empty)
+		self.assertIs(s.stored_cargo.parent_env, s)
+
+		self.assertEqual(s.total_stored_mass, c.mass)
+		self.assertEqual(s.total_stored_mass, i_1.mass * i_1_qty + i_2.mass * i_2_qty)
+
+		self.assertEqual(len(Entity.entity_list), 2)
+
+	def test_storage_total_stored_volume(self):
+		cls = Storage
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c = Cargo(item_dict=item_dict)
+
+		self.assertIsNotNone(c)
+
+		capacity = {Goods: 2000, Ore: 5000, Gas: 0}
+
+		s = cls(capacity=capacity)
+
+		self.assertIsNotNone(s)
+		self.assertTrue(s.is_empty)
+
+		s.expect_cargo(c)
+		s.store_cargo(c)
+
+		self.assertIsNotNone(s.stored_cargo)
+		self.assertIsNot(s.stored_cargo, c)
+		self.assertFalse(s.is_empty)
+		self.assertIs(s.stored_cargo.parent_env, s)
+
+		self.assertEqual(s.total_stored_volume, c.volume)
+		self.assertEqual(s.total_stored_volume, i_1.volume * i_1_qty + i_2.volume * i_2_qty)
+
+		self.assertEqual(len(Entity.entity_list), 2)
+
+	def test_storage_get_filled_space_by_class(self):
+		cls = Storage
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c = Cargo(item_dict=item_dict)
+
+		self.assertIsNotNone(c)
+
+		capacity = {Goods: 2000, Ore: 5000, Gas: 0}
+
+		s = cls(capacity=capacity)
+
+		s.expect_cargo(c)
+		s.store_cargo(c)
+
+		self.assertIsNotNone(s)
+
+		self.assertIsNotNone(s.stored_cargo)
+		self.assertIsNot(s.stored_cargo, c)
+		self.assertFalse(s.is_empty)
+
+		filled_space = s.get_filled_space_by_class(Goods)
+		self.assertIsNotNone(filled_space)
+		self.assertEqual(filled_space, i_1.volume * i_1_qty)
+		self.assertEqual(filled_space, c.get_total_volume_by_class(Goods))
+
+		filled_space = s.get_filled_space_by_class(Ore)
+		self.assertIsNotNone(filled_space)
+		self.assertEqual(filled_space, i_2.volume * i_2_qty)
+		self.assertEqual(filled_space, c.get_total_volume_by_class(Ore))
+
+		filled_space = s.get_filled_space_by_class(Gas)
+		self.assertIsNotNone(filled_space)
+		self.assertEqual(filled_space, 0)
+
+		self.assertEqual(len(Entity.entity_list), 2)
+
+	def test_storage_get_reserved_space_by_class(self):
+		cls = Storage
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c = Cargo(item_dict=item_dict)
+
+		self.assertIsNotNone(c)
+
+		capacity = {Goods: 2000, Ore: 5000, Gas: 0}
+
+		s = cls(capacity=capacity)
+
+		s.expect_cargo(c)
+
+		self.assertIsNotNone(s)
+
+		self.assertIsNotNone(s.expected_cargo_list)
+		self.assertEqual(len(s.expected_cargo_list), 1)
+		self.assertIs(s.expected_cargo_list[0], c)
+		self.assertTrue(s.is_empty)
+
+		reserved_space = s.get_reserved_space_by_class(Goods)
+		self.assertIsNotNone(reserved_space)
+		self.assertEqual(reserved_space, i_1.volume * i_1_qty)
+		self.assertEqual(reserved_space, c.get_total_volume_by_class(Goods))
+
+		reserved_space = s.get_reserved_space_by_class(Ore)
+		self.assertIsNotNone(reserved_space)
+		self.assertEqual(reserved_space, i_2.volume * i_2_qty)
+		self.assertEqual(reserved_space, c.get_total_volume_by_class(Ore))
+
+		reserved_space = s.get_reserved_space_by_class(Gas)
+		self.assertIsNotNone(reserved_space)
+		self.assertEqual(reserved_space, 0)
+
+		self.assertEqual(len(Entity.entity_list), 3)
+
+	def test_storage_get_occupied_space_by_class(self):
+		cls = Storage
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		item_dict[i_1] = i_1_qty
+
+		c_1 = Cargo(item_dict=item_dict)
+
+		self.assertIsNotNone(c_1)
+
+		item_dict = dict()
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_2] = i_2_qty
+
+		c_2 = Cargo(item_dict=item_dict)
+
+		self.assertIsNotNone(c_2)
+
+		capacity = {Goods: 2000, Ore: 5000, Gas: 0}
+
+		s = cls(capacity=capacity)
+
+		s.expect_cargo(c_1)
+		s.store_cargo(c_1)
+
+		s.expect_cargo(c_2)
+
+		self.assertIsNotNone(s)
+
+		self.assertIsNotNone(s.stored_cargo)
+		self.assertIsNot(s.stored_cargo, c_1)
+		self.assertFalse(s.is_empty)
+		self.assertTrue(i_1 in s.stored_cargo.item_dict)
+		self.assertEqual(s.stored_cargo.item_dict[i_1], i_1_qty)
+
+		self.assertIsNotNone(s.expected_cargo_list)
+		self.assertEqual(len(s.expected_cargo_list), 1)
+		self.assertIs(s.expected_cargo_list[0], c_2)
+
+		occupied_space = s.get_occupied_space_by_class(Goods)
+		self.assertIsNotNone(occupied_space)
+		self.assertEqual(occupied_space, i_1.volume * i_1_qty)
+		self.assertEqual(occupied_space, c_1.get_total_volume_by_class(Goods))
+		self.assertEqual(occupied_space, s.get_filled_space_by_class(Goods))
+
+		occupied_space = s.get_reserved_space_by_class(Ore)
+		self.assertIsNotNone(occupied_space)
+		self.assertEqual(occupied_space, i_2.volume * i_2_qty)
+		self.assertEqual(occupied_space, c_2.get_total_volume_by_class(Ore))
+		self.assertEqual(occupied_space, s.get_reserved_space_by_class(Ore))
+
+		occupied_space = s.get_reserved_space_by_class(Gas)
+		self.assertIsNotNone(occupied_space)
+		self.assertEqual(occupied_space, 0)
+
+		self.assertEqual(len(Entity.entity_list), 3)
 
 
 if __name__ == '__main__':

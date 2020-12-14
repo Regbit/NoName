@@ -17,14 +17,14 @@ def storage_test_1():
 	st_b = Storage(capacity={Goods: 50, Ore: 0, Gas: 0})
 	c = Cargo(item_list=[IronBar(quantity=50001)])
 
-	st_a.store(c)
+	st_a.store_cargo(c)
 	print(st_a)
 	print(c)
 
-	st_b.store(c)
+	st_b.store_cargo(c)
 	print(st_b)
 
-	print(st_a.stored_items_list is st_b.stored_items_list)
+	print(st_a.stored_cargo is st_b.stored_cargo)
 
 
 def storage_test_2():
@@ -35,10 +35,10 @@ def storage_test_2():
 	print(st)
 	st.expect_cargo(c_1)
 	print(st)
-	st.store(c_1)
+	st.store_cargo(c_1)
 	print(st)
 	try:
-		st.store(c_2)
+		st.store_cargo(c_2)
 	except CargoNotExpectedError as err:
 		print(f"Error: {err}")
 

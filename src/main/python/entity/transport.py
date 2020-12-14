@@ -31,7 +31,7 @@ class Vehicle(WorldEntity, ABC):
 
 	@property
 	def total_mass(self):
-		return self.mass + self.storage.total_mass
+		return self.mass + self.storage.total_stored_mass
 
 	def __str__(self):
 		return f"{self.obj_info}: M={self.mass}; P={self.pos};\n{self.storage}"

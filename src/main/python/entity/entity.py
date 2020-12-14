@@ -1,6 +1,7 @@
 from abc import ABC
 from position import Vector3
 from copy import deepcopy
+import logging
 
 
 class AttributeTypeError(Exception):
@@ -17,6 +18,7 @@ class Entity(ABC):
 	attributes_dict['name'] = lambda x: isinstance(x, str), None
 	attributes_dict['parent_env'] = lambda x: issubclass(type(x), Entity), None
 	base_name = 'Entity'
+	log = logging.getLogger(__name__)
 
 	def __init__(self, **kwargs):
 		"""
@@ -27,23 +29,34 @@ class Entity(ABC):
 		}
 		"""
 
+		self.log.info(f"[{self.cls_name()}] Initializing...")
+		self.log.debug(f"[{self.cls_name()}] kwargs = {kwargs}")
+
 		try:
 			self.name: str = None
 			self.parent_env: Entity = None
-
-			# kwargs.update(self.class_desc())
 
 			for name, meta in self.attributes_dict.items():
 				if kwargs.get(name) and meta[0](kwargs.get(name)):
 					self.__setattr__(name, kwargs.get(name))
 				elif kwargs.get(name) and not meta[0](kwargs.get(name)):
-					raise AttributeTypeError(f'Attribute {name} was not set! Input value: {kwargs.get(name)}')
+					raise AttributeTypeError(f'Attribute "{name}" was not set! Input value: {kwargs.get(name)}')
 				else:
-					self.__setattr__(name, deepcopy(meta[1]))
+					attr_copy = deepcopy(meta[1])
+					if issubclass(type(attr_copy), Entity) and attr_copy not in self.entity_list:
+						self.entity_list.append(attr_copy)
+					self.log.debug(f'[{self.cls_name()}] Attribute "{name}" was not input. Setting default value: {attr_copy}')
+					self.__setattr__(name, attr_copy)
+
 			self.entity_list.append(self)
+			self.log.debug(f"[{self.cls_name()}] entity_list = {self.entity_list}")
+			self.log.info(f"[{self.cls_name()}] Success!")
 		except AttributeTypeError as err:
-			# TODO Figure out what tot do here. Maybe use Logger.
-			pass
+			self.log.warning(f"[{self.cls_name()}] Could not make instance! Error message: {err}")
+
+	@classmethod
+	def cls_name(cls):
+		return cls.__name__
 
 	@property
 	def obj_info_short(self):
@@ -67,14 +80,14 @@ class Entity(ABC):
 		:param args: Entity array
 		:return:
 		"""
+		cls.log.info(f"[{cls.cls_name()}] Deleting objects: {args}")
 		for e in args:
 			if isinstance(e, Entity):
 				e.entity_list.remove(e)
 				del e
-
-	@classmethod
-	def class_desc(cls):
-		return {}
+				cls.log.info(f"[{cls.cls_name()}] Success!")
+			else:
+				cls.log.warning(f"[{cls.cls_name()}] Object {e} is not Entity subclass!")
 
 	def update(self):
 		raise NotImplementedError(f'Method update() was not implemented in class "{self.__class__.__name__}"')
@@ -99,6 +112,10 @@ class MassedEntity(Entity, ABC):
 		}
 		"""
 		super().__init__(**kwargs)
+
+	@classmethod
+	def cls_name(cls):
+		return f"{cls.__name__}: M={cls.mass}; V={cls.volume}"
 
 	def __str__(self):
 		return f"{self.obj_info}: M={self.mass}; V={self.volume}"

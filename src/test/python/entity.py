@@ -1,12 +1,14 @@
-from unittest import TestCase, main, skip
+from unittest import main, skip
+from src.test.python.nonametest import NoNameTestCase
 from src.main.python.entity.entity import *
 import gc
+import logging
 
 
-class EntityTest(TestCase):
+logging.basicConfig(level=logging.INFO, format='[%(levelname)s] [%(asctime)s] [%(module)s.%(funcName)s] %(message)s')
 
-	def tearDown(self) -> None:
-		Entity.entity_list.clear()
+
+class EntityTest(NoNameTestCase):
 
 	def test_entity_class_init(self):
 		cls = Entity
@@ -151,10 +153,7 @@ class EntityTest(TestCase):
 		# self.assertEqual(len(gc.get_referrers(e_par)), 0)
 
 
-class MassedEntityTest(TestCase):
-
-	def tearDown(self) -> None:
-		Entity.entity_list.clear()
+class MassedEntityTest(NoNameTestCase):
 
 	def test_massed_entity_class_init(self):
 		cls = MassedEntity
@@ -182,6 +181,8 @@ class MassedEntityTest(TestCase):
 
 		self.assertIsNotNone(cls.mass)
 		self.assertIsNotNone(cls.volume)
+
+		self.assertEqual(cls.base_name, 'Massed Entity')
 
 
 if __name__ == '__main__':
