@@ -1,5 +1,6 @@
 from src.main.python.entity.entity import Entity
 from src.main.python.entity.item import Item, Goods, Ore, Gas
+from copy import deepcopy
 
 
 class CargoSubtractionError(Exception):
@@ -208,8 +209,31 @@ class Storage(Entity):
 		return self.stored_cargo.volume
 
 	@property
+	def reserved_cargo(self) -> Cargo:
+		item_dict = dict()
+		for c in self.reserved_cargo_list:
+			for k, v in c.item_dict.items():
+				item_dict[k] = item_dict.get(k) + v
+		return Cargo(item_dict=item_dict)
+
+	@property
+	def expected_cargo(self) -> Cargo:
+		item_dict = dict()
+		for c in self.expected_cargo_list:
+			for k, v in c.item_dict.items():
+				item_dict[k] = item_dict.get(k) + v
+		return Cargo(item_dict=item_dict)
+
+	@property
 	def available_cargo(self) -> Cargo:
-		return self.stored_cargo - sum(self.reserved_cargo_list)
+		self.log.debug(f"{self.stored_cargo}, {self.reserved_cargo_list}")
+		item_dict = deepcopy(self.stored_cargo.item_dict)
+
+		for item, qty in item_dict.items():
+			for reserved_cargo in self.reserved_cargo_list:
+				item_dict[item] = qty - reserved_cargo.item_dict[item]
+
+		return Cargo(item_dict=item_dict)
 
 	def get_filled_space_by_class(self, cls) -> float:
 		"""
@@ -258,6 +282,7 @@ class Storage(Entity):
 										  f"Required space: {cargo.get_total_volume_by_class(cls)}")
 
 		self.expected_cargo_list.append(cargo)
+		cargo.parent_env = self
 
 		return True
 
@@ -284,7 +309,22 @@ class Storage(Entity):
 
 		return True
 
-	def reserve_cargo(self, cargo: Cargo):
+	def reserve_cargo(self, cargo: Cargo) -> bool:
+		"""
+		Attempts to add Cargo to reserved_cargo_list for Item reservation.
+		If there is not enough items available (in stored_cargo.item_dict) then method raises CanNotReserveCargoError.
+		:param cargo: Cargo (an item set) to reserve from available cargo
+		:return: True if successful
+		"""
 
-		for item in cargo.item_list:
-			pass
+		res = False
+
+		try:
+			res = bool(self.available_cargo - cargo)
+			self.reserved_cargo_list.append(cargo)
+			cargo.parent_env = self
+		except CargoSubtractionError as err:
+			self.log.error(f"[{self.cls_name()}] {err}")
+			raise CanNotReserveCargoError("Can not reserve cargo since there is not enough items available!")
+
+		return res

@@ -80,8 +80,9 @@ class Entity(ABC):
 		:param args: Entity array
 		:return:
 		"""
-		cls.log.info(f"[{cls.cls_name()}] Deleting objects: {args}")
+		cls.log.info(f"[{cls.cls_name()}] Deleting {len(args)} object{'s' if len(args) > 1 else ''}...")
 		for e in args:
+			cls.log.info(f"[{cls.cls_name()}] Attempting to delete '{e.obj_info_short}'...")
 			if isinstance(e, Entity):
 				e.entity_list.remove(e)
 				del e
