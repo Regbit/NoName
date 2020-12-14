@@ -688,6 +688,87 @@ class StorageTest(NoNameTestCase):
 
 		self.assertEqual(len(Entity.entity_list), 3)
 
+	def test_storage_release_expected_cargo_success(self):
+		cls = Storage
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c = Cargo(item_dict=item_dict)
+
+		self.assertIsNotNone(c)
+
+		capacity = {Goods: 200, Ore: 500, Gas: 0}
+
+		for item_type in (Goods, Ore, Gas):
+			self.assertGreaterEqual(capacity[item_type], c.get_total_volume_by_class(item_type))
+
+		s = cls(capacity=capacity)
+
+		self.assertIsNotNone(s)
+
+		s.expect_cargo(c)
+		res = s.release_expected_cargo(c)
+
+		self.assertTrue(res)
+		self.assertIsNotNone(s.expected_cargo_list)
+		self.assertIsInstance(s.expected_cargo_list, list)
+		self.assertEqual(len(s.expected_cargo_list), 0)
+
+		self.assertEqual(len(Entity.entity_list), 3)
+
+	def test_storage_release_expected_cargo_failure(self):
+		cls = Storage
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		item_dict[i_1] = i_1_qty
+
+		c_1 = Cargo(item_dict=item_dict)
+
+		self.assertIsNotNone(c_1)
+
+		item_dict = dict()
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_2] = i_2_qty
+
+		c_2 = Cargo(item_dict=item_dict)
+
+		self.assertIsNotNone(c_2)
+
+		capacity = {Goods: 200, Ore: 500, Gas: 0}
+
+		s = cls(capacity=capacity)
+
+		self.assertIsNotNone(s)
+
+		res = False
+
+		s.expect_cargo(c_1)
+
+		with self.assertRaises(CanNotReleaseCargoError):
+			res = s.release_expected_cargo(c_2)
+
+		self.assertFalse(res)
+		self.assertIsNotNone(s.expected_cargo_list)
+		self.assertIsInstance(s.expected_cargo_list, list)
+		self.assertEqual(len(s.expected_cargo_list), 1)
+		self.assertIs(s.expected_cargo_list[0], c_1)
+
+		self.assertEqual(len(Entity.entity_list), 4)
+
 	def test_storage_expect_cargo_failure(self):
 		cls = Storage
 		item_dict = dict()
