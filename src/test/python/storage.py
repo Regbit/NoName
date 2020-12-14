@@ -484,6 +484,11 @@ class CargoTest(NoNameTestCase):
 		self.assertEqual(c.is_empty, not bool(len(c.item_dict)))
 		self.assertFalse(c.is_empty)
 
+		c.item_dict = dict()
+
+		self.assertEqual(c.is_empty, not bool(len(c.item_dict)))
+		self.assertTrue(c.is_empty)
+
 		self.assertEqual(len(Entity.entity_list), 1)
 
 	def test_cargo_get_total_mass_by_class(self):
