@@ -350,3 +350,18 @@ class Storage(Entity):
 			raise CanNotReserveCargoError("Can not reserve cargo since there is not enough items available!")
 
 		return res
+
+	def release_reserve_cargo(self, cargo: Cargo):
+		"""
+		Releases (removes) reserved cargo from reserved_cargo_list if it was in there
+		:param cargo: Cargo (an item set) to release from expected cargo list
+		:return: True if successful
+		"""
+		res = False
+		if cargo in self.reserved_cargo_list:
+			self.reserved_cargo_list.remove(cargo)
+			res = True
+		else:
+			raise CanNotReleaseCargoError(f"Can not release cargo from reserved cargo list since it was not reserved!")
+
+		return res
