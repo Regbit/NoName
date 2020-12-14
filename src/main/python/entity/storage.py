@@ -32,49 +32,54 @@ class Cargo(Entity):
 		items = '\n\t'.join([str(k.cls_name()) + f"; Q={v}" for k, v in self.item_dict.items()])
 		return f"{self.obj_info}" + (f":\n\t{items}" if len(self.item_dict) else "")
 
-	def __add__(self, other):
+	def add(self, other):
 		new_item_dict = dict()
 		for k in list(self.item_dict.keys()) + list(other.item_dict.keys()):
 			new_item_dict[k] = (self.item_dict.get(k) or 0) + (other.item_dict.get(k) or 0)
-		return Cargo(item_dict=new_item_dict)
+		return new_item_dict
+
+	def __add__(self, other):
+		return Cargo(item_dict=self.add(other))
 
 	def __iadd__(self, other):
-		new_item_dict = dict()
-		for k in list(self.item_dict.keys()) + list(other.item_dict.keys()):
-			new_item_dict[k] = (self.item_dict.get(k) or 0) + (other.item_dict.get(k) or 0)
-		self.item_dict.update(new_item_dict)
+		self.item_dict.update(self.add(other))
 		return self
+
+	def sub(self, other):
+		for k in other.item_dict.keys():
+			if k not in self.item_dict:
+				raise CargoSubtractionError(f"Instance '{self.obj_info_short}' does not have item {k.cls_name()} to subtract from!")
+			elif self.item_dict[k] < other.item_dict[k]:
+				raise CargoSubtractionError(f"Instance '{self.obj_info_short}' does not have {other.item_dict[k]} units of item {k} to subtract from!")
+
+		new_item_dict = dict()
+		for k in self.item_dict.keys():
+			diff = self.item_dict.get(k) - (other.item_dict.get(k) or 0)
+			if diff:
+				new_item_dict[k] = diff
+
+		return new_item_dict
 
 	def __sub__(self, other):
-		for k in other.item_dict.keys():
-			if k not in self.item_dict:
-				raise CargoSubtractionError(f"Cargo {self} does not have item {k} to subtract from!")
-			elif self.item_dict[k] < other.item_dict[k]:
-				raise CargoSubtractionError(f"Cargo {self} does not have {other.item_dict[k]} units of item {k} to subtract from!")
+		out = None
 
-		new_item_dict = dict()
-		for k in self.item_dict.keys():
-			diff = self.item_dict.get(k) - (other.item_dict.get(k) or 0)
-			if diff:
-				new_item_dict[k] = diff
+		try:
+			out = Cargo(item_dict=self.sub(other))
+		except CargoSubtractionError as err:
+			raise err
 
-		return Cargo(item_dict=new_item_dict)
+		return out
 
 	def __isub__(self, other):
-		for k in other.item_dict.keys():
-			if k not in self.item_dict:
-				raise CargoSubtractionError(f"Cargo {self} does not have item {k} to subtract from!")
-			elif self.item_dict[k] < other.item_dict[k]:
-				raise CargoSubtractionError(f"Cargo {self} does not have {other.item_dict[k]} units of item {k} to subtract from!")
-
-		new_item_dict = dict()
-		for k in self.item_dict.keys():
-			diff = self.item_dict.get(k) - (other.item_dict.get(k) or 0)
-			if diff:
-				new_item_dict[k] = diff
-		self.item_dict.update(new_item_dict)
+		try:
+			self.item_dict.update(self.sub(other))
+		except CargoSubtractionError as err:
+			raise err
 
 		return self
+
+	def __bool__(self):
+		return bool(sum(self.item_dict.values()) or 0)
 
 	@property
 	def mass(self) -> float:
