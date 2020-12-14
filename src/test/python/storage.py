@@ -428,6 +428,12 @@ class CargoTest(NoNameTestCase):
 		self.assertFalse(c.is_empty)
 
 		self.assertEqual(c.mass, i_1.mass * i_1_qty + i_2.mass * i_2_qty)
+		self.assertNotEqual(c.mass, 0)
+
+		c.item_dict = dict()
+
+		self.assertNotEqual(c.mass, i_1.mass * i_1_qty + i_2.mass * i_2_qty)
+		self.assertEqual(c.mass, 0)
 
 		self.assertEqual(len(Entity.entity_list), 1)
 
@@ -450,6 +456,12 @@ class CargoTest(NoNameTestCase):
 		self.assertFalse(c.is_empty)
 
 		self.assertEqual(c.volume, i_1.volume * i_1_qty + i_2.volume * i_2_qty)
+		self.assertNotEqual(c.volume, 0)
+
+		c.item_dict = dict()
+
+		self.assertNotEqual(c.volume, i_1.volume * i_1_qty + i_2.volume * i_2_qty)
+		self.assertEqual(c.volume, 0)
 
 		self.assertEqual(len(Entity.entity_list), 1)
 
