@@ -182,7 +182,7 @@ class MassedEntityTest(NoNameTestCase):
 		self.assertIsNotNone(cls.mass)
 		self.assertIsNotNone(cls.volume)
 
-		self.assertEqual(cls.base_name, 'Massed Entity')
+		self.assertEqual(cls.base_name, 'Massed entity')
 
 
 if __name__ == '__main__':
