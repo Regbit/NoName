@@ -153,6 +153,13 @@ class CanNotReleaseCargoError(Exception):
 	pass
 
 
+class CargoNotReservedError(Exception):
+	"""
+	Exception raised when Cargo tried to be transferred without being reserved from Storage
+	"""
+	pass
+
+
 class Storage(Entity):
 	"""
 	Class used to represent and manage storage of Entity
@@ -284,9 +291,11 @@ class Storage(Entity):
 
 		for cls in self.storage_types_tuple:
 			if cargo.get_total_volume_by_class(cls) > self.get_available_space_by_class(cls):
-				raise NotEnoughSpaceError(f"Can not reserve space for cargo since there's not enough space in {cls.__name__} storage!\n"
-										  f"Available space: {self.get_available_space_by_class(cls)}\n"
-										  f"Required space: {cargo.get_total_volume_by_class(cls)}")
+				raise NotEnoughSpaceError(
+					f"Can not reserve space for cargo since there's not enough space in {cls.__name__} storage!\n"
+					f"Available space: {self.get_available_space_by_class(cls)}\n"
+					f"Required space: {cargo.get_total_volume_by_class(cls)}"
+				)
 
 		self.expected_cargo_list.append(cargo)
 		cargo.parent_env = self
