@@ -1095,6 +1095,114 @@ class StorageTest(NoNameTestCase):
 
 		self.assertEqual(len(Entity.entity_list), 3)
 
+	def test_storage_transfer_cargo_success(self):
+		cls = Storage
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c_1 = Cargo(item_dict=item_dict)
+
+		self.assertIsNotNone(c_1)
+
+		capacity = {Goods: 200, Ore: 500, Gas: 0}
+
+		for item_type in (Goods, Ore, Gas):
+			self.assertGreaterEqual(capacity[item_type], c_1.get_total_volume_by_class(item_type))
+
+		s = cls(capacity=capacity)
+
+		self.assertIsNotNone(s)
+
+		s.expect_cargo(c_1)
+		s.store_cargo(c_1)
+
+		self.assertFalse(s.is_empty)
+
+		i_3 = IronOre
+		i_3_qty = 1
+
+		item_dict = dict()
+		item_dict[i_3] = i_3_qty
+
+		c_2 = Cargo(item_dict=item_dict)
+
+		s.reserve_cargo(c_2)
+		res = s.transfer_cargo(c_2)
+
+		self.assertTrue(res)
+
+		self.assertEqual(s.stored_cargo.mass, i_1.mass * i_1_qty + i_2.mass * i_2_qty - i_3.mass * i_3_qty)
+		self.assertEqual(s.stored_cargo.volume, i_1.volume * i_1_qty + i_2.volume * i_2_qty - i_3.volume * i_3_qty)
+
+		self.assertIsNotNone(s.reserved_cargo_list)
+		self.assertIsInstance(s.reserved_cargo_list, list)
+		self.assertEqual(len(s.reserved_cargo_list), 0)
+
+		self.assertEqual(len(Entity.entity_list), 5)
+
+	def test_storage_transfer_cargo_failure(self):
+		cls = Storage
+		item_dict = dict()
+
+		i_1 = IronBar
+		i_1_qty = 1
+
+		i_2 = IronOre
+		i_2_qty = 2
+
+		item_dict[i_1] = i_1_qty
+		item_dict[i_2] = i_2_qty
+
+		c_1 = Cargo(item_dict=item_dict)
+
+		self.assertIsNotNone(c_1)
+
+		capacity = {Goods: 200, Ore: 500, Gas: 0}
+
+		for item_type in (Goods, Ore, Gas):
+			self.assertGreaterEqual(capacity[item_type], c_1.get_total_volume_by_class(item_type))
+
+		s = cls(capacity=capacity)
+
+		self.assertIsNotNone(s)
+
+		s.expect_cargo(c_1)
+		s.store_cargo(c_1)
+
+		self.assertFalse(s.is_empty)
+
+		i_3 = IronOre
+		i_3_qty = 1
+
+		item_dict = dict()
+		item_dict[i_3] = i_3_qty
+
+		c_2 = Cargo(item_dict=item_dict)
+
+		res = False
+
+		with self.assertRaises(CargoNotReservedError):
+			res = s.transfer_cargo(c_2)
+
+		self.assertFalse(res)
+
+		self.assertEqual(s.stored_cargo.mass, i_1.mass * i_1_qty + i_2.mass * i_2_qty)
+		self.assertEqual(s.stored_cargo.volume, i_1.volume * i_1_qty + i_2.volume * i_2_qty)
+
+		self.assertIsNotNone(s.reserved_cargo_list)
+		self.assertIsInstance(s.reserved_cargo_list, list)
+		self.assertEqual(len(s.reserved_cargo_list), 0)
+
+		self.assertEqual(len(Entity.entity_list), 3)
+
 	def test_storage_total_stored_mass(self):
 		cls = Storage
 		item_dict = dict()
