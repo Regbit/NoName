@@ -365,3 +365,23 @@ class Storage(Entity):
 			raise CanNotReleaseCargoError(f"Can not release cargo from reserved cargo list since it was not reserved!")
 
 		return res
+
+	def transfer_cargo(self, cargo: Cargo):
+		"""
+		Attempts to transfer reserved Cargo.
+		If Cargo was not reserved (not in reserved_cargo_list) then method raises CargoNotReservedError.
+		:param cargo: Cargo (an item set) to store
+		:return: True if successful
+		"""
+
+		# Check if cargo expected
+		if cargo not in self.reserved_cargo_list:
+			raise CargoNotReservedError("Can not transfer cargo since it was not reserved!")
+
+		# Store cargo
+		self.stored_cargo -= cargo
+
+		# Free space
+		self.release_reserve_cargo(cargo)
+
+		return True
