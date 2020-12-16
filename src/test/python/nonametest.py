@@ -1,5 +1,5 @@
 from unittest import TestCase
-from entity.entity import Entity
+from com.nng.entity.entity import Entity
 import logging
 
 

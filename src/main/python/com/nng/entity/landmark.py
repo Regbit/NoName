@@ -1,5 +1,5 @@
 from abc import ABC
-from entity.worldentity import WorldEntity
+from com.nng.entity.worldentity import WorldEntity
 
 
 class Landmark(WorldEntity, ABC):

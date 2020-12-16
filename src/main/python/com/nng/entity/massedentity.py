@@ -1,5 +1,5 @@
 from abc import ABC
-from entity.entity import Entity
+from com.nng.entity.entity import Entity
 
 
 class MassedEntity(Entity, ABC):

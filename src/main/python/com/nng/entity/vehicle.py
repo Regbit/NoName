@@ -1,6 +1,6 @@
 from abc import ABC
-from entity.worldentity import WorldEntity
-from entity.item import Goods, Ore, Gas
+from com.nng.entity.worldentity import WorldEntity
+from com.nng.entity.item import Goods, Ore, Gas
 
 
 class Vehicle(WorldEntity, ABC):

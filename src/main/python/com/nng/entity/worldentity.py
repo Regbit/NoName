@@ -1,8 +1,8 @@
 from abc import ABC
-from entity.item import Goods, Ore, Gas
-from entity.massedentity import MassedEntity
-from entity.storage import Storage
-from position import Vector3
+from com.nng.entity.item import Goods, Ore, Gas
+from com.nng.entity.massedentity import MassedEntity
+from com.nng.entity.storage import Storage
+from com.nng.position import Vector3
 
 
 class CantSetDestinationError(Exception):

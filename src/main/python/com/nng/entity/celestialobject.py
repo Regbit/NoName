@@ -1,6 +1,6 @@
 from abc import ABC
-from entity.worldentity import WorldEntity
-from src.main.python.tools import calc_radius
+from com.nng.entity.worldentity import WorldEntity
+from com.nng.tools import calc_radius
 
 
 class CelestialObject(WorldEntity, ABC):

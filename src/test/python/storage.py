@@ -1,7 +1,7 @@
 from unittest import main
 from src.test.python.nonametest import NoNameTestCase
-from entity.item import *
-from entity.storage import *
+from com.nng.entity.item import *
+from com.nng.entity.storage import *
 import logging
 
 

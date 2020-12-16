@@ -1,6 +1,6 @@
-from entity.entity import Entity
-from entity.item import Goods, Ore, Gas
-from entity.cargo import CargoSubtractionError, Cargo
+from com.nng.entity.entity import Entity
+from com.nng.entity.item import Goods, Ore, Gas
+from com.nng.entity.cargo import CargoSubtractionError, Cargo
 from copy import deepcopy
 
 

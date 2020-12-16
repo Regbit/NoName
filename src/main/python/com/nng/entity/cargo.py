@@ -1,4 +1,4 @@
-from entity.entity import Entity
+from com.nng.entity.entity import Entity
 
 
 class CargoSubtractionError(Exception):

@@ -1,5 +1,5 @@
 from abc import ABC
-from entity.massedentity import MassedEntity
+from com.nng.entity.massedentity import MassedEntity
 
 
 class Item(MassedEntity, ABC):
