@@ -1,5 +1,5 @@
 from abc import ABC
-from entity.entity import WorldEntity
+from entity.worldentity import WorldEntity
 
 
 class Sentient(WorldEntity, ABC):

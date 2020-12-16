@@ -1,5 +1,5 @@
 from abc import ABC
-from src.main.python.entity.entity import MassedEntity
+from entity.massedentity import MassedEntity
 
 
 class Item(MassedEntity, ABC):

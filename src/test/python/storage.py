@@ -1,11 +1,11 @@
-from unittest import main, skip
+from unittest import main
 from src.test.python.nonametest import NoNameTestCase
-from src.main.python.entity.item import *
-from src.main.python.entity.storage import *
+from entity.item import *
+from entity.storage import *
 import logging
 
 
-logging.basicConfig(level=logging.INFO, format='[%(levelname)s] [%(asctime)s] [%(module)s.%(funcName)s] %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] [%(asctime)s] [%(module)s.%(funcName)s] %(message)s')
 
 
 class CargoTest(NoNameTestCase):

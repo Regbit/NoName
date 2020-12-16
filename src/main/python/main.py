@@ -2,7 +2,7 @@ from entity.building import Building
 from entity.celestialobject import Planet
 from entity.storage import *
 from entity.item import *
-from entity.transport import *
+from entity.vehicle import *
 from tools import set_attribute_for_all_elements
 
 

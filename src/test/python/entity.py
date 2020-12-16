@@ -1,6 +1,7 @@
 from unittest import main, skip
 from src.test.python.nonametest import NoNameTestCase
-from src.main.python.entity.entity import *
+from entity.entity import Entity
+from entity.massedentity import MassedEntity
 import gc
 import logging
 

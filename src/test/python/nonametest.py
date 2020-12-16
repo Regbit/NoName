@@ -1,5 +1,5 @@
 from unittest import TestCase
-from src.main.python.entity.entity import Entity
+from entity.entity import Entity
 import logging
 
 

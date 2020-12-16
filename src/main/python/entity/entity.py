@@ -1,5 +1,4 @@
 from abc import ABC
-from position import Vector3
 from copy import deepcopy
 import logging
 
@@ -22,7 +21,7 @@ class Entity(ABC):
 
 	def __init__(self, **kwargs):
 		"""
-		Initialization of an object. New object added to Entity.entity_list.
+		Initialization of an object. New object is added to Entity.entity_list.
 		:param kwargs: {
 			name: str,
 			parent_env: Entity
@@ -59,8 +58,12 @@ class Entity(ABC):
 		return cls.__name__
 
 	@property
+	def hash(self):
+		return f"#..{str(self.__hash__())[-5:]}"
+
+	@property
 	def obj_info_short(self):
-		return f"{self.base_name} #..{str(self.__hash__())[-5:]}"
+		return f"{self.base_name} {self.hash}"
 
 	@property
 	def obj_info(self):
@@ -92,83 +95,3 @@ class Entity(ABC):
 
 	def update(self):
 		raise NotImplementedError(f'Method update() was not implemented in class "{self.__class__.__name__}"')
-
-
-class MassedEntity(Entity, ABC):
-	"""
-	Extension of Entity class to represent entities affected by physics
-	"""
-
-	attributes_dict = Entity.attributes_dict_copy()
-	base_name = 'Massed Entity'
-	mass = 0.0
-	volume = 0.0
-
-	def __init__(self, **kwargs):
-		"""
-
-		:param kwargs: {
-			name: str,
-			parent_env: Entity
-		}
-		"""
-		super().__init__(**kwargs)
-
-	@classmethod
-	def cls_name(cls):
-		return f"{cls.__name__}: M={cls.mass}; V={cls.volume}"
-
-	def __str__(self):
-		return f"{self.obj_info}: M={self.mass}; V={self.volume}"
-
-
-class WorldEntity(MassedEntity, ABC):
-	"""
-	Extension of MassedEntity class to represent entities that can be placed in the world and can move around
-	"""
-
-	attributes_dict = MassedEntity.attributes_dict_copy()
-	attributes_dict['pos'] = lambda x: isinstance(x, Vector3), Vector3()
-	attributes_dict['can_move'] = lambda x: isinstance(x, bool), True
-	attributes_dict['destination_pos'] = lambda x: isinstance(x, Vector3), Vector3()
-	attributes_dict['max_speed'] = lambda x: isinstance(x, (float, int)) and x > 0, 0.0
-	base_name = 'World Entity'
-	mass = 0.0
-	volume = 0.0
-	max_speed = 0.0
-
-	def __init__(self, **kwargs):
-		"""
-
-		:param kwargs: {
-			name: str,
-			parent_env: Entity,
-			pos: Vector3,
-			can_move: bool,
-			destination_pos: Vector3
-		}
-		"""
-
-		self.pos: Vector3 = None
-		self.can_move: bool = None
-		self.destination_pos: Vector3 = None
-		super().__init__(**kwargs)
-
-	def set_destination(self, destination):
-		if isinstance(destination, WorldEntity):
-			self.destination_pos = destination.pos
-		elif isinstance(destination, Vector3):
-			self.destination_pos = destination
-		else:
-			return False
-		return True
-
-	def draw(self):
-		raise NotImplementedError(f'Method draw() was not implemented in class "{self.__class__.__name__}"')
-
-	def move(self):
-		raise NotImplementedError(f'Method move() was not implemented in class "{self.__class__.__name__}"')
-
-
-class ResourceNode(WorldEntity):
-	pass
