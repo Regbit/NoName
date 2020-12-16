@@ -18,7 +18,6 @@ class WorldEntity(MassedEntity, ABC):
 	attributes_dict['pos'] = lambda x: isinstance(x, Vector3), Vector3()
 	attributes_dict['can_move'] = lambda x: isinstance(x, bool), True
 	attributes_dict['path'] = lambda x: isinstance(x, list), list()
-	attributes_dict['max_speed'] = lambda x: isinstance(x, (float, int)) and x > 0, 0.0
 	attributes_dict['storage'] = lambda x: isinstance(x, Storage), Storage()
 	base_name = 'World entity'
 	mass = 0.0
@@ -43,7 +42,6 @@ class WorldEntity(MassedEntity, ABC):
 		self.can_move: bool = None
 		self.path: list = None
 		self.storage: Storage = None
-		self.max_payload_mass: float = None
 		kwargs['storage'] = Storage(capacity=self.storage_capacity, parent_env=self)
 		super().__init__(**kwargs)
 

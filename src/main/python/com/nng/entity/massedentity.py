@@ -22,9 +22,5 @@ class MassedEntity(Entity, ABC):
 		"""
 		super().__init__(**kwargs)
 
-	@classmethod
-	def cls_name(cls):
-		return f"{cls.__name__}: M={cls.mass}; V={cls.volume}"
-
 	def __str__(self):
 		return f"{self.obj_info}: M={self.mass}; V={self.volume}"

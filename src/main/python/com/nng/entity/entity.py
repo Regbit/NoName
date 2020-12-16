@@ -39,7 +39,7 @@ class Entity(ABC):
 				if kwargs.get(name) and meta[0](kwargs.get(name)):
 					self.__setattr__(name, kwargs.get(name))
 				elif kwargs.get(name) and not meta[0](kwargs.get(name)):
-					raise AttributeTypeError(f'Attribute "{name}" was not set! Input value: {kwargs.get(name)}')
+					raise AttributeTypeError(f'Attribute "{name}" was not set! Input value: {kwargs.get(name)}. Expected: {meta[1]}')
 				else:
 					attr_copy = deepcopy(meta[1])
 					if issubclass(type(attr_copy), Entity) and attr_copy not in self.entity_list:

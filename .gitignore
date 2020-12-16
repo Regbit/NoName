@@ -10,3 +10,9 @@ venv/
 src/test/python/.pytest_cache/
 
 src/main/python/__pycache__/
+
+src/main/python/com/__pycache__/__init__.cpython-38.pyc
+
+src/main/python/com/nng/__pycache__/__init__.cpython-38.pyc
+
+src/main/python/com/nng/__pycache__/

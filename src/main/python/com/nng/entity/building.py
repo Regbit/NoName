@@ -28,9 +28,9 @@ class Building(WorldEntity, ABC):
 		super().__init__(**kwargs)
 
 
-class Storage(Building, ABC):
+class Warehouse(Building, ABC):
 
-	base_name = 'Storage'
+	base_name = 'Warehouse'
 	storage_capacity = {Goods: 1000.0, Ore: 10000.0, Gas: 0.0}
 
 

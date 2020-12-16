@@ -7,7 +7,7 @@ class Vector3:
 		self.x, self.y, self.z = round(x, 8), round(y, 8), round(z, 8)
 
 	def __str__(self):
-		return f"({self.x}; {self.y}: {self.z})"
+		return f"Vector3({self.x}; {self.y}: {self.z})"
 
 	def __add__(self, other):
 		return Vector3(
