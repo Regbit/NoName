@@ -1,5 +1,6 @@
 from abc import ABC
 from com.nng.entity.worldentity import WorldEntity
+from com.nng.entity.request import CargoRequest
 from com.nng.entity.item import Goods, Ore, Gas
 
 
@@ -33,8 +34,16 @@ class Warehouse(Building, ABC):
 	base_name = 'Warehouse'
 	storage_capacity = {Goods: 1000.0, Ore: 10000.0, Gas: 0.0}
 
+	def update(self):
+		if not self.request:
+			self.request = CargoRequest(cargo={Goods: 1000.0, Ore: 10000.0, Gas: 0.0}, parent_env=self)
+
 
 class Miner(Building, ABC):
 
 	base_name = 'Miner'
 	storage_capacity = {Goods: 100.0, Ore: 1000.0, Gas: 0.0}
+
+	def update(self):
+		# TODO Request to mine
+		pass

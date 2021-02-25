@@ -2,6 +2,7 @@ from abc import ABC
 from com.nng.entity.item import Goods, Ore, Gas
 from com.nng.entity.massedentity import MassedEntity
 from com.nng.entity.storage import Storage
+from com.nng.entity.request import Request
 from com.nng.position import Vector3
 
 
@@ -42,6 +43,7 @@ class WorldEntity(MassedEntity, ABC):
 		self.can_move: bool = None
 		self.path: list = None
 		self.storage: Storage = None
+		self.request: Request = None
 		kwargs['storage'] = Storage(capacity=self.storage_capacity, parent_env=self)
 		super().__init__(**kwargs)
 
@@ -50,7 +52,7 @@ class WorldEntity(MassedEntity, ABC):
 		return self.mass + self.storage.total_stored_mass
 
 	def __str__(self):
-		return f"{self.obj_info}: M={self.mass}; P={self.pos};\n{self.storage}"
+		return f"{self.obj_info}: M={self.mass}; P={self.pos}; S={self.storage}"
 
 	def can_reach(self, destination):
 		# TODO Placeholder. Write logic considering Vehicle type (can go to space?)

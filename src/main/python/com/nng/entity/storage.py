@@ -77,6 +77,9 @@ class Storage(Entity):
 
 		self.stored_cargo.parent_env = self
 
+	def update(self):
+		pass
+
 	@property
 	def obj_info(self) -> str:
 		capacity = '; '.join([f'{k.__name__}: {v}' for k, v in self.capacity.items()])
@@ -87,7 +90,7 @@ class Storage(Entity):
 		return f"{super().obj_info}:\n\tC=({capacity});\n\tRS=({reserved_space});\n\tOS=({filled_space});\n\tAS=({available_space});\n\t\t{items}"
 
 	def __str__(self):
-		return f"{self.obj_info_short}:"
+		return f"{self.obj_info_short}"
 
 	@property
 	def is_empty(self) -> bool:

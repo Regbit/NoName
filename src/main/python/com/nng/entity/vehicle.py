@@ -31,3 +31,13 @@ class ScavengerMKII(Rover):
 	max_speed = 280.0
 	max_payload_mass = 1750.0
 	storage_capacity = {Goods: 7.5, Ore: 0.0, Gas: 0.0}
+
+
+class MuleMKI(Rover):
+
+	base_name = 'Mule MKI'
+	mass = 3500.0
+	volume = 37.0
+	max_speed = 170.0
+	max_payload_mass = 3500.0
+	storage_capacity = {Goods: 0.0, Ore: 20.0, Gas: 0.0}

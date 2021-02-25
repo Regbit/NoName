@@ -630,7 +630,9 @@ class StorageTest(NoNameTestCase):
 
 		capacity = {Goods: 2000, Ore: 5000, Gas: 0}
 
-		s = cls(capacity=capacity, stored_cargo=c)
+		e = Entity()
+
+		s = cls(capacity=capacity, stored_cargo=c, parent_env=e)
 
 		self.assertIsNotNone(s)
 
@@ -646,7 +648,10 @@ class StorageTest(NoNameTestCase):
 		self.assertIsNot(s.stored_cargo, c)
 		self.assertTrue(s.is_empty)
 
-		self.assertEqual(len(Entity.entity_list), 3)
+		self.assertIsNotNone(s.parent_env)
+		self.assertIs(s.parent_env, e)
+
+		self.assertEqual(len(Entity.entity_list), 4)
 
 	def test_storage_expect_cargo_success(self):
 		cls = Storage

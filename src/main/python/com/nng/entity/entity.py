@@ -63,11 +63,11 @@ class Entity(ABC):
 
 	@property
 	def obj_info_short(self):
-		return f"{self.base_name} {self.hash}"
+		return f"{self.base_name} {self.hash}" + (f" ({self.parent_env.obj_info_short})" if self.parent_env else '')
 
 	@property
 	def obj_info(self):
-		return self.obj_info_short + (f" ({self.parent_env.obj_info_short})" if self.parent_env else '')
+		return self.obj_info_short
 
 	def __str__(self):
 		return f'{self.obj_info}: N="{self.name}"'
@@ -92,6 +92,16 @@ class Entity(ABC):
 				cls.log.info(f"[{cls.cls_name()}] Success!")
 			else:
 				cls.log.warning(f"[{cls.cls_name()}] Object {e} is not Entity subclass!")
+
+	@classmethod
+	def update_all(cls):
+		for e in cls.entity_list:
+			e.update()
+
+	@classmethod
+	def print_all(cls):
+		for i, e in zip(range(len(cls.entity_list)), cls.entity_list):
+			print(f"{i}: {e}")
 
 	def update(self):
 		raise NotImplementedError(f'Method update() was not implemented in class "{self.__class__.__name__}"')
