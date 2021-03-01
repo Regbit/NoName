@@ -41,3 +41,6 @@ class MuleMKI(Rover):
 	max_speed = 170.0
 	max_payload_mass = 3500.0
 	storage_capacity = {Goods: 0.0, Ore: 20.0, Gas: 0.0}
+
+	def update(self):
+		pass

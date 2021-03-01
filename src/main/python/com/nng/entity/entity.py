@@ -67,6 +67,7 @@ class Entity(ABC):
 
 	@property
 	def obj_info(self):
+		# TODO Remove redundant methods
 		return self.obj_info_short
 
 	def __str__(self):

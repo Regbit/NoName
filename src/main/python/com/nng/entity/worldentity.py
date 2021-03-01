@@ -55,7 +55,7 @@ class WorldEntity(MassedEntity, ABC):
 		return f"{self.obj_info}: M={self.mass}; P={self.pos}; S={self.storage}"
 
 	def can_reach(self, destination):
-		# TODO Placeholder. Write logic considering Vehicle type (can go to space?)
+		# TODO Placeholder. Write logic considering Vehicle type (can it move in the air or space?)
 		return self.can_move
 
 	def build_path(self, destination) -> list:

@@ -39,9 +39,9 @@ class Warehouse(Building, ABC):
 			self.request = CargoRequest(cargo={Goods: 1000.0, Ore: 10000.0, Gas: 0.0}, parent_env=self)
 
 
-class Miner(Building, ABC):
+class Excavator(Building, ABC):
 
-	base_name = 'Miner'
+	base_name = 'Excavator'
 	storage_capacity = {Goods: 100.0, Ore: 1000.0, Gas: 0.0}
 
 	def update(self):
